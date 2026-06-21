@@ -24,7 +24,7 @@ import acougue_especiais
 import acougue_pecas
 import embalagem
 import padaria_confeitaria
-#import materia_prima
+import materia_prima
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. VARIÁVEIS DE SESSÃO GLOBAIS
@@ -152,6 +152,9 @@ else:
 
     elif st.session_state['modulo_ativo'] == 'padaria_confeitaria':
         padaria_confeitaria.iniciar_tela()
+
+    elif st.session_state['modulo_ativo'] == 'materia_prima':
+        materia_prima.iniciar_tela()
     
     elif st.session_state['modulo_ativo'] == 'acougue_especiais':
         acougue_especiais.iniciar_tela()
