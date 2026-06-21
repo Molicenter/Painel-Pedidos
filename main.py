@@ -35,7 +35,6 @@ IMG_ORIENTAL = "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=4
 IMG_ACOUGUE  = "https://images.unsplash.com/photo-1544025162-d76694265947?w=400"
 IMG_PADARIA  = "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400"
 
-# Função inteligente que lê tanto Links da Web quanto Imagens Locais do GitHub
 @st.cache_data
 def imagem_para_b64(caminho):
     if not caminho: return ""
@@ -50,7 +49,7 @@ def imagem_para_b64(caminho):
         return ""
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4. VARIÁVEIS DE SESSÃO GLOBAIS E CSS DO PAINEL
+# 4. VARIÁVEIS DE SESSÃO GLOBAIS
 # ─────────────────────────────────────────────────────────────────────────────
 if 'usuario_logado' not in st.session_state:
     st.session_state['usuario_logado'] = None
@@ -59,7 +58,7 @@ if 'modulo_ativo' not in st.session_state:
     st.session_state['modulo_ativo'] = 'Home'
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. CSS AVANÇADO (VISUAL COMPACTO E BOTÕES BRANCOS)
+# 5. CSS AVANÇADO (VISUAL ANTIGO: ZOOM 67% + BOTÕES BRANCOS)
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -69,12 +68,12 @@ st.markdown("""
     color: #ffffff !important;
 }
 
-/* ── Controle de Largura, Espaços e Zoom (Simula 80%/67% do navegador) ── */
+/* ── Controle de Largura, Espaços e Zoom cravado em 67% ── */
 .block-container {
-    padding-top: 1rem !important;
+    padding-top: 1.5rem !important;
     padding-bottom: 1rem !important;
-    max-width: 98% !important;
-    zoom: 0.85; /* Reduz a escala de toda a página para caber sem rolar */
+    max-width: 95% !important;
+    zoom: 0.67; /* Escala exata solicitada */
 }
 
 /* Ocultar Menu e Cabeçalho Nativo do Streamlit */
@@ -85,9 +84,9 @@ footer {visibility: hidden;}
 /* ── Banner Superior Azul Escuro ── */
 .banner-container {
     background: linear-gradient(135deg, #07263b 0%, #0e4a74 100%);
-    padding: 10px 24px;
+    padding: 12px 24px;
     border-radius: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 25px;
     display: flex;
     align-items: center;
     gap: 14px;
@@ -95,13 +94,13 @@ footer {visibility: hidden;}
     border: 1px solid rgba(255,255,255,0.1);
 }
 .banner-logo {
-    height: 35px;
+    height: 40px;
     width: auto;
     object-fit: contain;
 }
 .banner-title {
     font-family: 'Segoe UI', Tahoma, sans-serif;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 800;
     color: #fff;
     letter-spacing: 0.5px;
@@ -117,22 +116,23 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     transition: all 0.25s ease !important;
 }
 div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 8px 20px rgba(0, 147, 233, 0.25) !important;
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 24px rgba(0, 147, 233, 0.25) !important;
     border-color: rgba(0, 147, 233, 0.5) !important;
+    background: rgba(40, 40, 40, 0.8) !important;
 }
 div[data-testid="stVerticalBlockBorderWrapper"] > div {
-    padding: 10px !important; /* Espaçamento interno mais justo */
-    gap: 6px !important;
+    padding: 12px !important;
+    gap: 8px !important;
 }
 
-/* ── Imagem do Card (Altura Reduzida) ── */
+/* ── Imagem do Card ── */
 .card-img-container {
     width: 100%;
-    height: 90px; /* Reduzido para caber mais conteúdo na tela */
-    border-radius: 6px;
+    height: 110px; 
+    border-radius: 8px;
     overflow: hidden;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
     background-color: #1a1a1a;
 }
 .card-img-container img {
@@ -146,63 +146,65 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover .card-img-container img {
     opacity: 1.0;
 }
 
-/* ── Botões Brancos de Título (Forçando a cor nas letras) ── */
-div[data-testid="stVerticalBlockBorderWrapper"] button {
+/* ── Botões Brancos de Título (Forçando a cor das letras) ── */
+div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"] {
     background-color: #ffffff !important;
     border: none !important;
     border-radius: 6px !important;
     width: 100% !important;
-    min-height: 35px !important;
-    padding: 4px 10px !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+    min-height: 40px !important;
+    padding: 8px 12px !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
     transition: all 0.2s ease !important;
 }
-div[data-testid="stVerticalBlockBorderWrapper"] button p {
-    color: #000000 !important; /* Força o texto do botão a ser preto */
+/* O * (asterisco) força tudo dentro do botão (texto, parágrafo, div) a ficar na cor certa */
+div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"] * {
+    color: #0B3C5D !important;
     font-weight: 800 !important;
-    font-size: 14px !important;
+    font-size: 15px !important;
     margin: 0 !important;
 }
-div[data-testid="stVerticalBlockBorderWrapper"] button:hover {
-    background-color: #e6e6e6 !important;
-    transform: translateY(-1px);
+div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"]:hover {
+    background-color: #e0f2ff !important;
+    transform: scale(1.01) !important;
 }
 
 /* ── Formatação de Texto de Horários ── */
 .texto-horario {
-    font-size: 11px;
-    color: #a1a1aa;
-    line-height: 1.3;
+    font-size: 12.5px;
+    color: #ffffff;
+    line-height: 1.4;
     font-weight: 500;
-    min-height: 28px;
+    min-height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
 /* ── Títulos das Linhas (Setores) ── */
 .linha-titulo-sec {
-    font-size: 13px;
+    font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #5cb3e6;
-    margin-bottom: 8px;
-    margin-top: 15px;
+    color: #0093E9;
+    margin-bottom: 10px;
+    margin-top: 25px;
     font-weight: 700;
-    border-left: 3px solid #1f8bbf;
+    border-left: 3px solid #0093E9;
     padding-left: 8px;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 6. TELA DE LOGIN ÚNICA DO PORTAL
+# 6. TELA DE LOGIN ÚNICA DO PORTAL (AUMENTADA)
 # ─────────────────────────────────────────────────────────────────────────────
 if st.session_state['usuario_logado'] is None:
     st.write("<br><br>", unsafe_allow_html=True)
-    _, col2, _ = st.columns([1, 1.4, 1])
+    # Aumentado o peso da coluna central (de 1.4 para 2.2) para o login ficar mais largo
+    _, col2, _ = st.columns([1, 2.2, 1])
     with col2:
         with st.container(border=True):
             st.markdown("""
@@ -233,7 +235,7 @@ if st.session_state['usuario_logado'] is None:
     st.stop()
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 7. FUNÇÕES PARA GERAR A VITRINE DE CARDS (DASHBOARD)
+# 7. FUNÇÕES PARA GERAR A VITRINE DE CARDS
 # ─────────────────────────────────────────────────────────────────────────────
 def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
     img_src = imagem_para_b64(caminho_imagem)
@@ -248,11 +250,11 @@ def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
         else:
             st.markdown(f"""
             <div class="card-img-container" style="display:flex; justify-content:center; align-items:center;">
-                <span style="font-size: 35px;">{emoji_fallback}</span>
+                <span style="font-size: 40px;">{emoji_fallback}</span>
             </div>
             """, unsafe_allow_html=True)
         
-        # Botão branco com texto preto forçado pelo CSS
+        # Botão branco com texto forçado via CSS Global (*)
         if st.button(titulo, key=f"btn_{chave_modulo}", use_container_width=True):
             st.session_state['modulo_ativo'] = chave_modulo
             st.rerun()
@@ -262,7 +264,7 @@ def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
 def renderizar_dashboard():
     # Banner Principal
     logo_src = imagem_para_b64("passaro_logo.png")
-    img_tag = f'<img src="{logo_src}" class="banner-logo" alt="Logo">' if logo_src else '<span style="font-size:24px">🛒</span>'
+    img_tag = f'<img src="{logo_src}" class="banner-logo" alt="Logo">' if logo_src else '<span style="font-size:28px">🛒</span>'
     
     st.markdown(f"""
     <div class="banner-container">
@@ -272,7 +274,7 @@ def renderizar_dashboard():
     """, unsafe_allow_html=True)
 
     # --- LINHA 1 ---
-    st.markdown('<div class="linha-titulo-sec">🥬 Setor Hortifruti (FLV)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="linha-titulo-sec">🥦 Setor Hortifruti (FLV)</div>', unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4, gap="medium")
     with c1: criar_card("Folhagem", "Seg a Sáb até 12:00hrs", IMG_FOLHAGEM, "🥬", "flv_folhagem")
     with c2: criar_card("FLV Normal", "Terças-feira até 17:00hrs<br>Quintas-feira até 14:00hrs", IMG_FLV, "🍎", "flv_normal")
@@ -292,6 +294,8 @@ def renderizar_dashboard():
     with c1: criar_card("Embalagens", "Sexta-feira até as 17:30hrs", "Embalagens.jpg", "🥡", "embalagem")
     with c2: criar_card("Padaria e Confeitaria", "Sábado", IMG_PADARIA, "🥖", "padaria_confeitaria")
     with c3: criar_card("Matéria Prima", "Até Sábado", "materiaprima.jpg", "🌾", "materia_prima")
+
+    st.write("<br><br>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 8. ROTEADOR DE TELAS
