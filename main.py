@@ -144,7 +144,7 @@ else:
     elif st.session_state['modulo_ativo'] == 'flv_ofertas':
         flv_ofertas.iniciar_tela()
 
-     elif st.session_state['modulo_ativo'] == 'flv_oriental':
+    elif st.session_state['modulo_ativo'] == 'flv_oriental':
         flv_oriental.iniciar_tela()
     
     elif st.session_state['modulo_ativo'] == 'acougue_especiais':
