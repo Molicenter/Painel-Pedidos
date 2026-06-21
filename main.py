@@ -142,7 +142,7 @@ else:
         acougue_especiais.iniciar_tela()
 
     elif st.session_state['modulo_ativo'] == 'acougue_total':
-        acougue_especiais.iniciar_tela()
+        acougue_total.iniciar_tela()
         
     elif st.session_state['modulo_ativo'] == 'flv_normal':
         st.info("🍎 Módulo FLV Normal em construção...")
