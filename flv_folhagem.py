@@ -36,9 +36,11 @@ def buscar_produtos_pg(codigos):
     if not codigos:
         return pd.DataFrame(columns=["Código", "Descrição"])
     cods_str = ", ".join(map(str, set(codigos)))
-    query = f"SELECT DISTINCT cade_codigo AS "Código", cadp_descricao AS "Descrição" FROM python_estoque WHERE cade_codigo IN ({cods_str})"
-    try: return conn_pg.query(query)
-    except: return pd.DataFrame()
+    query = f"""SELECT DISTINCT cade_codigo AS "Código", cadp_descricao AS "Descrição" FROM python_estoque WHERE cade_codigo IN ({cods_str})"""
+    try: 
+        return conn_pg.query(query)
+    except: 
+        return pd.DataFrame()
 
 @st.cache_data(ttl=15)
 def carregar_catalogo_folhagem():
