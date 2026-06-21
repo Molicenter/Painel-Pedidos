@@ -58,7 +58,7 @@ if 'modulo_ativo' not in st.session_state:
     st.session_state['modulo_ativo'] = 'Home'
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. CSS AVANÇADO (VISUAL EXATO DA FOTO 1)
+# 5. CSS AVANÇADO (VISUAL EXATO + FORÇAR MENU ESQUERDO)
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -75,10 +75,21 @@ st.markdown("""
     zoom: 0.90 !important; /* Ajuste fino: compacto para os cards, mas legível no login */
 }
 
-/* Ocultar Menu e Rodapé, MAS DEIXAR O CABEÇALHO TRANSPARENTE PARA NÃO SUMIR O BOTÃO DA SIDEBAR */
+/* Ocultar Menu e Rodapé, MAS DEIXAR O CABEÇALHO TRANSPARENTE */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
-header {background-color: transparent !important;} /* <- A MÁGICA ESTÁ AQUI */
+header {background-color: transparent !important;} 
+
+/* ── MÁGICA: FORÇAR O MENU ESQUERDO A APARECER PARA AS LOJAS ── */
+/* Isso anula as travas escondidas dentro dos outros 9 arquivos dos setores */
+html body [data-testid="collapsedControl"] {
+    display: flex !important;
+    visibility: visible !important;
+    z-index: 99999 !important;
+}
+html body section[data-testid="stSidebar"] {
+    display: block !important;
+}
 
 /* ── Banner Superior Azul Escuro ── */
 .banner-container {
@@ -141,7 +152,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover .card-img-container img {
 }
 
 /* ── Botões Brancos de Título (FORÇANDO BRANCO E PRETO) ── */
-/* Usamos :not([kind="primary"]) para não estragar o botão azul do Login */
 div[data-testid="stVerticalBlockBorderWrapper"] button:not([kind="primary"]) {
     background-color: #ffffff !important;
     background: #ffffff !important;
@@ -197,12 +207,10 @@ div[data-testid="stVerticalBlockBorderWrapper"] button:not([kind="primary"]):hov
 if st.session_state['usuario_logado'] is None:
     st.write("<br><br><br>", unsafe_allow_html=True)
     
-    # Aumentando a largura da coluna central para 1.8 (deixa a caixa mais imponente)
     _, col2, _ = st.columns([1, 1, 1])
     
     with col2:
         with st.container(border=True):
-            # Espaço extra interno para deixar "quadrado"
             st.write("<br>", unsafe_allow_html=True)
             
             st.markdown("""
