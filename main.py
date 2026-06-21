@@ -27,7 +27,7 @@ import padaria_confeitaria
 import materia_prima
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. LINKS E VARIÁVEIS DE IMAGENS EXTERNAS
+# 3. LINKS E VARIÁVEIS DE IMAGENS EXTERNAS E LOCAIS
 # ─────────────────────────────────────────────────────────────────────────────
 IMG_FOLHAGEM = "https://images.unsplash.com/photo-1574316071802-0d684efa7bf5?w=400"
 IMG_FLV      = "https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=400"
@@ -58,7 +58,7 @@ if 'modulo_ativo' not in st.session_state:
     st.session_state['modulo_ativo'] = 'Home'
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. CSS AVANÇADO (VISUAL ANTIGO: ZOOM 67% + BOTÕES BRANCOS)
+# 5. CSS AVANÇADO (VISUAL ANTIGO RESTAURADO COM PERFEIÇÃO)
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -73,7 +73,7 @@ st.markdown("""
     padding-top: 1.5rem !important;
     padding-bottom: 1rem !important;
     max-width: 95% !important;
-    zoom: 0.67; /* Escala exata solicitada */
+    zoom: 0.67 !important; /* Escala exata solicitada */
 }
 
 /* Ocultar Menu e Cabeçalho Nativo do Streamlit */
@@ -146,9 +146,10 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover .card-img-container img {
     opacity: 1.0;
 }
 
-/* ── Botões Brancos de Título (Forçando a cor das letras) ── */
+/* ── Botões Brancos de Título (Forçando a cor das letras e fundo branco) ── */
 div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"] {
     background-color: #ffffff !important;
+    background: #ffffff !important;
     border: none !important;
     border-radius: 6px !important;
     width: 100% !important;
@@ -157,7 +158,7 @@ div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"] {
     box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
     transition: all 0.2s ease !important;
 }
-/* O * (asterisco) força tudo dentro do botão (texto, parágrafo, div) a ficar na cor certa */
+/* Força TUDO dentro do botão a ficar azul marinho escuro */
 div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"] * {
     color: #0B3C5D !important;
     font-weight: 800 !important;
@@ -166,7 +167,8 @@ div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"] * {
 }
 div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"]:hover {
     background-color: #e0f2ff !important;
-    transform: scale(1.01) !important;
+    background: #e0f2ff !important;
+    transform: scale(1.02) !important;
 }
 
 /* ── Formatação de Texto de Horários ── */
@@ -199,12 +201,15 @@ div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"]:hover {
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 6. TELA DE LOGIN ÚNICA DO PORTAL (AUMENTADA)
+# 6. TELA DE LOGIN ÚNICA DO PORTAL (MAIS QUADRADA E CENTRALIZADA)
 # ─────────────────────────────────────────────────────────────────────────────
 if st.session_state['usuario_logado'] is None:
-    st.write("<br><br>", unsafe_allow_html=True)
-    # Aumentado o peso da coluna central (de 1.4 para 2.2) para o login ficar mais largo
-    _, col2, _ = st.columns([1, 2.2, 1])
+    # Adicionando um pouco de espaço extra acima do login para centrar melhor verticalmente
+    st.write("<br><br><br>", unsafe_allow_html=True)
+    
+    # Ajustei a coluna do meio (1.2) para que a caixa fique mais quadrada e não tão esticada
+    _, col2, _ = st.columns([1, 1.2, 1])
+    
     with col2:
         with st.container(border=True):
             st.markdown("""
@@ -241,6 +246,7 @@ def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
     img_src = imagem_para_b64(caminho_imagem)
     
     with st.container(border=True):
+        # Imagem na proporção exata
         if img_src:
             st.markdown(f"""
             <div class="card-img-container">
@@ -254,11 +260,12 @@ def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
             </div>
             """, unsafe_allow_html=True)
         
-        # Botão branco com texto forçado via CSS Global (*)
+        # O botão branco (agora blindado pelo CSS Global)
         if st.button(titulo, key=f"btn_{chave_modulo}", use_container_width=True):
             st.session_state['modulo_ativo'] = chave_modulo
             st.rerun()
             
+        # Textos e Horários alinhados e brancos
         st.markdown(f'<div class="texto-horario">{subtitulo}</div>', unsafe_allow_html=True)
 
 def renderizar_dashboard():
@@ -295,7 +302,15 @@ def renderizar_dashboard():
     with c2: criar_card("Padaria e Confeitaria", "Sábado", IMG_PADARIA, "🥖", "padaria_confeitaria")
     with c3: criar_card("Matéria Prima", "Até Sábado", "materiaprima.jpg", "🌾", "materia_prima")
 
+    # ─────────────────────────────────────────────
+    # RODAPÉ ELEGÂNTE E RESTAURADO
+    # ─────────────────────────────────────────────
     st.write("<br><br>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="text-align:center; margin-top:30px; margin-bottom: 20px; color:#7d8590; font-size:14px; font-weight: 500;">
+        Molicenter Supermercados © 2026 — Painel Web de Pedidos Centralizados
+    </div>
+    """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 8. ROTEADOR DE TELAS
