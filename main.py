@@ -88,7 +88,7 @@ def criar_card(titulo, subtitulo, nome_imagem, emoji_fallback, chave_modulo):
             st.rerun()
 
 def renderizar_dashboard():
-    st.markdown("### 🦆 Gestão Pedidos - Molicenter")
+    st.markdown("### 📦 Gestão Pedidos - Molicenter")
     st.divider()
 
     st.markdown("#### 🥬 SETOR HORTIFRUTI (FLV)")
