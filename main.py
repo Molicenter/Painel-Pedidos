@@ -72,7 +72,7 @@ st.markdown("""
     padding-top: 1.5rem !important;
     padding-bottom: 1rem !important;
     max-width: 95% !important;
-    zoom: 0.70 !important; /* Ajuste fino: compacto para os cards, mas legível no login */
+    zoom: 0.90 !important; /* Ajuste fino: compacto para os cards, mas legível no login */
 }
 
 /* Ocultar Menu e Rodapé, MAS DEIXAR O CABEÇALHO TRANSPARENTE PARA NÃO SUMIR O BOTÃO DA SIDEBAR */
@@ -198,7 +198,7 @@ if st.session_state['usuario_logado'] is None:
     st.write("<br><br><br>", unsafe_allow_html=True)
     
     # Aumentando a largura da coluna central para 1.8 (deixa a caixa mais imponente)
-    _, col2, _ = st.columns([1, 1.8, 1])
+    _, col2, _ = st.columns([1, 1, 1])
     
     with col2:
         with st.container(border=True):
