@@ -22,7 +22,7 @@ import flv_oriental
 import acougue_total
 import acougue_especiais
 import acougue_pecas
-#import embalagem
+import embalagem
 #import padaria_confeitaria
 #import materia_prima
 
@@ -146,6 +146,9 @@ else:
 
     elif st.session_state['modulo_ativo'] == 'flv_oriental':
         flv_oriental.iniciar_tela()
+
+    elif st.session_state['modulo_ativo'] == 'embalagens':
+        embalagens.iniciar_tela()
     
     elif st.session_state['modulo_ativo'] == 'acougue_especiais':
         acougue_especiais.iniciar_tela()
