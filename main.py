@@ -197,7 +197,7 @@ if st.session_state['usuario_logado'] is None:
     st.write("<br><br><br>", unsafe_allow_html=True)
     
     # Aumentando a largura da coluna central para 1.8 (deixa a caixa mais imponente)
-    _, col2, _ = st.columns([1, 1.8, 1])
+    _, col2, _ = st.columns([1, 1, 1])
     
     with col2:
         with st.container(border=True):
@@ -207,7 +207,7 @@ if st.session_state['usuario_logado'] is None:
             st.markdown("""
                 <div style='text-align:center;'>
                     <h2 style='margin-bottom:0; color:white;'>Portal de Pedidos</h2>
-                    <p style='color:#7d8590;font-size:14px;'>Acesso Unificado — Molicenter</p>
+                    <p style='color:#7d8590;font-size:18px;'>Acesso Unificado — Molicenter</p>
                 </div>
             """, unsafe_allow_html=True)
             st.divider()
