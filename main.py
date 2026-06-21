@@ -298,7 +298,7 @@ def renderizar_dashboard():
     # ─────────────────────────────────────────────
     # RODAPÉ
     # ─────────────────────────────────────────────
-    st.write("<br><br><br>", unsafe_allow_html=True)
+    st.write("<br>", unsafe_allow_html=True)
     st.markdown("""
     <div style="text-align:center; margin-top:20px; padding-bottom: 20px; color:#ffffff; font-size:14px; font-weight: 500;">
         Molicenter Supermercados © 2026 — Painel Web de Pedidos Centralizados
