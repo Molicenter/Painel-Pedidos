@@ -347,3 +347,12 @@ else:
 
     elif st.session_state['modulo_ativo'] == 'acougue_pecas':
         acougue_pecas.iniciar_tela()
+
+# ─────────────────────────────────────────────
+# RODAPÉ
+# ─────────────────────────────────────────────
+st.markdown("""
+<div style="text-align:center; margin-top:30px; color:#ffffff; font-size:14px; font-weight: 500;">
+    Molicenter Supermercados © 2026 — Painel Web de Pedidos Centralizados
+</div>
+""", unsafe_allow_html=True)
