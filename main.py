@@ -144,7 +144,7 @@ else:
     elif st.session_state['modulo_ativo'] == 'acougue_total':
         acougue_total.iniciar_tela()
 
-      elif st.session_state['modulo_ativo'] == 'acougue_pecas':
+    elif st.session_state['modulo_ativo'] == 'acougue_pecas':
         acougue_pecas.iniciar_tela()
         
     elif st.session_state['modulo_ativo'] == 'flv_normal':
