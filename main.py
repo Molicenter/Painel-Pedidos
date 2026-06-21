@@ -60,11 +60,6 @@ if 'modulo_ativo' not in st.session_state:
 # ─────────────────────────────────────────────────────────────────────────────
 # 5. CSS AVANÇADO (VISUAL EXATO DA FOTO 1)
 # ─────────────────────────────────────────────────────────────────────────────
-/* ── Esconde o st.button duplicado dentro dos cards ── */
-div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stButton"] button {
-    display: none !important;
-}
-
 st.markdown("""
 <style>
 /* ── Base do Tema ── */
