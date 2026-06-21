@@ -72,7 +72,7 @@ st.markdown("""
     padding-top: 1.5rem !important;
     padding-bottom: 1rem !important;
     max-width: 95% !important;
-    zoom: 0.70 !important; /* Ajuste fino: compacto para os cards, mas legível no login */
+    zoom: 0.85 !important; /* Ajuste fino: compacto para os cards, mas legível no login */
 }
 
 /* Ocultar Menu e Cabeçalho Nativo do Streamlit */
