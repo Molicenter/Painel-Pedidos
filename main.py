@@ -102,8 +102,10 @@ def renderizar_dashboard():
     
     st.markdown("#### 🥩 SETOR AÇOUGUE E AVES")
     c1, c2, c3, _ = st.columns(4)
-    with c1: criar_card("Pioneiro + BF + Paraná", "Seg a Sex até 11:00hrs", "Pioneiros.jpg", "🍗", "acougue_total")
-    with c2: criar_card("Açougue Adriano", "Qua e Sáb até 15:00hrs", "img_adriano.jpg", "🔪", "acougue_especiais")
+    # Trocámos a chave do Pioneiro para "acougue_especiais"
+    with c1: criar_card("Pioneiro + BF + Paraná", "Seg a Sex até 11:00hrs", "Pioneiros.jpg", "🍗", "acougue_especiais")
+    # Colocámos a chave "acougue_total" no Adriano (ajuste depois se for o contrário)
+    with c2: criar_card("Açougue Adriano", "Qua e Sáb até 15:00hrs", "img_adriano.jpg", "🔪", "acougue_total")
     with c3: criar_card("Peças Açougue - Manoel", "Ter, Qui e Sáb", "img_manoel.jpg", "🥩", "acougue_pecas")
 
     st.write("<br>", unsafe_allow_html=True)
@@ -136,8 +138,8 @@ else:
     if st.session_state['modulo_ativo'] == 'flv_folhagem':
         flv_folhagem.iniciar_tela()
         
+    elif st.session_state['modulo_ativo'] == 'acougue_especiais':
+        acougue_especiais.iniciar_tela()
+        
     elif st.session_state['modulo_ativo'] == 'flv_normal':
         st.info("🍎 Módulo FLV Normal em construção...")
-        
-    elif st.session_state['modulo_ativo'] == 'embalagem':
-        st.info("📦 Módulo de Embalagens em construção...")
