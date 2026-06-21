@@ -27,7 +27,7 @@ import padaria_confeitaria
 import materia_prima
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. LINKS E VARIÁVEIS DE IMAGENS EXTERNAS
+# 3. LINKS E VARIÁVEIS DE IMAGENS EXTERNAS E LOCAIS
 # ─────────────────────────────────────────────────────────────────────────────
 IMG_FOLHAGEM = "https://images.unsplash.com/photo-1574316071802-0d684efa7bf5?w=400"
 IMG_FLV      = "https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=400"
@@ -35,7 +35,6 @@ IMG_ORIENTAL = "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=4
 IMG_ACOUGUE  = "https://images.unsplash.com/photo-1544025162-d76694265947?w=400"
 IMG_PADARIA  = "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400"
 
-# Função inteligente que lê tanto Links da Web quanto Imagens Locais do GitHub
 @st.cache_data
 def imagem_para_b64(caminho):
     if not caminho: return ""
@@ -50,7 +49,7 @@ def imagem_para_b64(caminho):
         return ""
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4. VARIÁVEIS DE SESSÃO GLOBAIS E CSS DO PAINEL
+# 4. VARIÁVEIS DE SESSÃO GLOBAIS
 # ─────────────────────────────────────────────────────────────────────────────
 if 'usuario_logado' not in st.session_state:
     st.session_state['usuario_logado'] = None
@@ -58,39 +57,149 @@ if 'usuario_logado' not in st.session_state:
 if 'modulo_ativo' not in st.session_state:
     st.session_state['modulo_ativo'] = 'Home'
 
-# Estilo para forçar o botão a ser um bloco branco (estilo antigo)
-# Usamos [kind="secondary"] para afetar os cards sem estragar o botão verde do Login!
+# ─────────────────────────────────────────────────────────────────────────────
+# 5. CSS AVANÇADO (VISUAL ANTIGO RESTAURADO)
+# ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
+/* ── Base do Tema ── */
+.stApp, .main {
+    background-color: #0a0a0a !important;
+    color: #ffffff !important;
+}
+
+/* ── Controle de Largura Máxima e Remoção de Sobras ── */
+.block-container {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1rem !important;
+    max-width: 94% !important;
+}
+
+/* Ocultar Menu e Cabeçalho Nativo do Streamlit */
+#MainMenu {visibility: hidden;}
+header {visibility: hidden;}
+footer {visibility: hidden;}
+
+/* ── Banner Superior ── */
+.banner-container {
+    background: linear-gradient(135deg, #07263b 0%, #0e4a74 100%);
+    padding: 12px 24px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 4px 15px rgba(0, 147, 233, 0.15);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.banner-logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+.banner-title {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.5px;
+}
+
+/* ── Container do Card do Streamlit transformado no Card Antigo ── */
+div[data-testid="stVerticalBlockBorderWrapper"] {
+    background: rgba(30, 30, 30, 0.6) !important;
+    backdrop-filter: blur(8px) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    transition: all 0.25s ease !important;
+}
+div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 24px rgba(0, 147, 233, 0.25) !important;
+    border-color: rgba(0, 147, 233, 0.5) !important;
+    background: rgba(40, 40, 40, 0.8) !important;
+}
+/* Alinhamento interno do card */
+div[data-testid="stVerticalBlockBorderWrapper"] > div {
+    padding: 12px !important;
+    gap: 8px !important;
+}
+
+/* ── Imagem do Card ── */
+.card-img-container {
+    width: 100%;
+    height: 110px; /* Altura ideal balanceada para caber tudo */
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2px;
+    background-color: #1a1a1a;
+}
+.card-img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.9;
+    transition: opacity 0.3s;
+}
+div[data-testid="stVerticalBlockBorderWrapper"]:hover .card-img-container img {
+    opacity: 1.0;
+}
+
+/* ── Botões Brancos de Título ── */
 .main div[data-testid="stButton"] button[kind="secondary"] {
     background-color: #ffffff !important;
-    color: #000000 !important;
-    border: none !important;
+    color: #0B3C5D !important;
+    font-weight: 800 !important;
+    font-size: 15px !important;
+    padding: 6px 12px !important;
     border-radius: 6px !important;
-    font-weight: 700 !important;
-    width: 100% !important;
-    padding: 0.35rem !important;
+    border: none !important;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
-    transition: all 0.2s;
+    transition: all 0.2s ease !important;
+    min-height: 38px !important;
 }
 .main div[data-testid="stButton"] button[kind="secondary"]:hover {
-    background-color: #e0e0e0 !important;
-    transform: translateY(-1px);
+    background-color: #e0f2ff !important;
+    color: #07263b !important;
+    transform: scale(1.01) !important;
 }
 .main div[data-testid="stButton"] button[kind="secondary"] p {
-    font-size: 13px !important;
+    font-size: 14px !important;
     margin: 0 !important;
 }
 
-/* Ajusta o espaçamento interno dos containers para ficarem mais compactos */
-[data-testid="stVerticalBlockBorderWrapper"] > div {
-    padding: 1rem !important;
+/* ── Formatação de Texto de Horários ── */
+.texto-horario {
+    font-size: 12.5px;
+    color: #ffffff;
+    line-height: 1.4;
+    font-weight: 500;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-top: 4px;
+}
+
+/* ── Títulos das Linhas (Setores) ── */
+.linha-titulo-sec {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #0093E9;
+    margin-bottom: 10px;
+    margin-top: 25px;
+    font-weight: 700;
+    border-left: 3px solid #0093E9;
+    padding-left: 8px;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. TELA DE LOGIN ÚNICA DO PORTAL
+# 6. TELA DE LOGIN ÚNICA DO PORTAL
 # ─────────────────────────────────────────────────────────────────────────────
 if st.session_state['usuario_logado'] is None:
     st.write("<br><br>", unsafe_allow_html=True)
@@ -99,7 +208,7 @@ if st.session_state['usuario_logado'] is None:
         with st.container(border=True):
             st.markdown("""
                 <div style='text-align:center;'>
-                    <h2 style='margin-bottom:0'>Portal de Pedidos</h2>
+                    <h2 style='margin-bottom:0; color:white;'>Portal de Pedidos</h2>
                     <p style='color:#7d8590;font-size:14px;'>Acesso Unificado — Molicenter</p>
                 </div>
             """, unsafe_allow_html=True)
@@ -125,77 +234,73 @@ if st.session_state['usuario_logado'] is None:
     st.stop()
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 6. FUNÇÕES PARA GERAR A VITRINE DE CARDS (DASHBOARD ELEGANTE)
+# 7. FUNÇÕES PARA GERAR A VITRINE DE CARDS (DASHBOARD ANTIGO RESTAURADO)
 # ─────────────────────────────────────────────────────────────────────────────
-def titulo_secao(icone, texto):
-    st.markdown(f"""
-    <div style="border-left: 3px solid #1f8bbf; padding-left: 10px; margin-bottom: 10px; margin-top: 20px;">
-        <h4 style="margin: 0; color: #5cb3e6; font-size: 13px; font-weight: 700; text-transform: uppercase;">{icone} {texto}</h4>
-    </div>
-    """, unsafe_allow_html=True)
-
 def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
     img_src = imagem_para_b64(caminho_imagem)
     
     with st.container(border=True):
-        # MÁGICA AQUI: object-fit: cover faz a imagem cortar as sobras e preencher o quadro como um banner
+        # 1. Imagem na proporção exata
         if img_src:
             st.markdown(f"""
-            <div style="height: 90px; width: 100%; margin-bottom: 12px; overflow: hidden; border-radius: 4px; background-color: #ffffff;">
-                <img src="{img_src}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+            <div class="card-img-container">
+                <img src="{img_src}">
             </div>
             """, unsafe_allow_html=True)
         else:
             st.markdown(f"""
-            <div style="height: 90px; width: 100%; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; background-color: #21262d; border-radius: 4px;">
+            <div class="card-img-container" style="display:flex; justify-content:center; align-items:center;">
                 <span style="font-size: 40px;">{emoji_fallback}</span>
             </div>
             """, unsafe_allow_html=True)
         
-        # O botão branco
+        # 2. O botão de ação que navega (Estilizado como o texto branco via CSS global)
         if st.button(titulo, key=f"btn_{chave_modulo}", use_container_width=True):
             st.session_state['modulo_ativo'] = chave_modulo
             st.rerun()
             
-        # O subtítulo pequeno e centralizado
-        st.markdown(f"<p style='text-align:center; color:#a1a1aa; font-size:10px; margin-top:6px; margin-bottom:0px; line-height:1.3;'>{subtitulo}</p>", unsafe_allow_html=True)
+        # 3. O texto do rodapé (Dias e Horários)
+        st.markdown(f'<div class="texto-horario">{subtitulo}</div>', unsafe_allow_html=True)
 
 def renderizar_dashboard():
-    # Cabeçalho Azul com as bordas arredondadas e logotipo
+    # Banner Principal
     logo_src = imagem_para_b64("passaro_logo.png")
-    img_tag = f'<img src="{logo_src}" width="35" style="margin-right: 15px;">' if logo_src else '<span style="font-size: 24px; margin-right: 10px;">🦆</span>'
+    img_tag = f'<img src="{logo_src}" class="banner-logo" alt="Logo">' if logo_src else '<span style="font-size:28px">🛒</span>'
     
     st.markdown(f"""
-    <div style="background-color: #0c436b; padding: 12px 20px; border-radius: 8px; display: flex; align-items: center; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+    <div class="banner-container">
         {img_tag}
-        <h2 style="margin: 0; color: #ffffff; font-size: 18px; font-weight: 700;">Gestão Pedidos - Molicenter</h2>
+        <div class="banner-title">Gestão Pedidos - Molicenter</div>
     </div>
     """, unsafe_allow_html=True)
 
     # --- LINHA 1 ---
-    titulo_secao("🥬", "SETOR HORTIFRUTI (FLV)")
-    c1, c2, c3, c4 = st.columns(4)
+    st.markdown('<div class="linha-titulo-sec">🥦 Setor Hortifruti (FLV)</div>', unsafe_allow_html=True)
+    c1, c2, c3, c4 = st.columns(4, gap="medium")
     with c1: criar_card("Folhagem", "Seg a Sáb até 12:00hrs", IMG_FOLHAGEM, "🥬", "flv_folhagem")
     with c2: criar_card("FLV Normal", "Terças-feira até 17:00hrs<br>Quintas-feira até 14:00hrs", IMG_FLV, "🍎", "flv_normal")
     with c3: criar_card("FLV Ofertas", "Quintas-feiras até 14:00hrs", IMG_FLV, "🏷️", "flv_ofertas")
     with c4: criar_card("FLV Oriental", "Quintas-feiras até 14:00hrs", IMG_ORIENTAL, "🍣", "flv_oriental")
 
     # --- LINHA 2 ---
-    titulo_secao("🥩", "SETOR AÇOUGUE E AVES")
-    c1, c2, c3, _ = st.columns(4)
+    st.markdown('<div class="linha-titulo-sec">🥩 Setor Açougue e Aves</div>', unsafe_allow_html=True)
+    c1, c2, c3, _ = st.columns(4, gap="medium")
     with c1: criar_card("Pioneiro + BF + Paraná", "Seg a Sex até 11:00hrs", "Pioneiros.jpg", "🍗", "acougue_especiais")
     with c2: criar_card("Açougue Adriano", "Quartas-feira até 15:00hrs<br>Sábado até 15:00hrs", IMG_ACOUGUE, "🔪", "acougue_total")
-    with c3: criar_card("Peças Açougue - Manoel", "Seg / Qua / Sex — Arapongas até 15:00h<br>Ter / Qui / Sáb — Maringá até 15:00h", "img_manoel.jpg", "🥩", "acougue_pecas")
+    with c3: criar_card("Peças Açougue - Manoel", "Seg/Qua/Sex - Arap. 15:00h<br>Ter/Qui/Sáb - Maringá 15:00h", "img_manoel.jpg", "🥩", "acougue_pecas")
 
     # --- LINHA 3 ---
-    titulo_secao("📦", "OUTROS SETORES E LOGÍSTICA")
-    c1, c2, c3, _ = st.columns(4)
-    with c1: criar_card("Embalagens", "Sexta-feira até 17:30hrs", "Embalagens.jpg", "🥡", "embalagem")
+    st.markdown('<div class="linha-titulo-sec">📦 Outros Setores e Logística</div>', unsafe_allow_html=True)
+    c1, c2, c3, _ = st.columns(4, gap="medium")
+    with c1: criar_card("Embalagens", "Sexta-feira até as 17:30hrs", "Embalagens.jpg", "🥡", "embalagem")
     with c2: criar_card("Padaria e Confeitaria", "Sábado", IMG_PADARIA, "🥖", "padaria_confeitaria")
     with c3: criar_card("Matéria Prima", "Até Sábado", "materiaprima.jpg", "🌾", "materia_prima")
 
+    # Rodapé Invisível para dar um suspiro na página
+    st.write("<br><br>", unsafe_allow_html=True)
+
 # ─────────────────────────────────────────────────────────────────────────────
-# 7. ROTEADOR DE TELAS
+# 8. ROTEADOR DE TELAS
 # ─────────────────────────────────────────────────────────────────────────────
 if st.session_state['modulo_ativo'] == 'Home':
     renderizar_dashboard()
