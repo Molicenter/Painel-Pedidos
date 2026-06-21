@@ -11,220 +11,6 @@ from streamlit_gsheets import GSheetsConnection
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
 # ─────────────────────────────────────────────
-# CONFIGURAÇÃO DA PÁGINA
-# ─────────────────────────────────────────────
-st.set_page_config(
-    page_title="Gestão de Pedidos - Embalagens",
-    page_icon="📦",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# ─────────────────────────────────────────────
-# INICIALIZAÇÃO DE VARIÁVEIS DE SESSÃO
-# ─────────────────────────────────────────────
-if 'reset_counter_embalagem' not in st.session_state:
-    st.session_state['reset_counter_embalagem'] = 0
-
-if 'usuario_logado_embalagem' not in st.session_state:
-    st.session_state['usuario_logado_embalagem'] = None
-
-# ─────────────────────────────────────────────
-# CSS GLOBAL E DE IMPRESSÃO (PALETA MARROM CLARO / CARAMELO)
-# ─────────────────────────────────────────────
-st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;700&display=swap');
-
-:root {
-    --bg-main:        #0d1117;
-    --bg-card:        #161b22;
-    --bg-sidebar:     #0d1117;
-    --brown-dark:     #3a2610; 
-    --brown-mid:      #8b5a2b; 
-    --brown-accent:   #cd853f; 
-    --brown-bright:   #eebb88; 
-    --brown-glow:     rgba(205, 133, 63, .25);
-    --text-primary:   #e6edf3;
-    --text-muted:     #7d8590;
-    --text-header:    #f5deb3; 
-    --border:         #21262d;
-    --border-active:  #cd853f;
-    --row-hover:      rgba(205, 133, 63, .08);
-    --row-selected:   rgba(205, 133, 63, .18);
-}
-
-.stApp, .main { background-color: var(--bg-main) !important; color: var(--text-primary) !important; }
-html, body, [class*="css"] { font-family: 'IBM Plex Sans', sans-serif !important; }
-section[data-testid="stSidebar"] { background-color: var(--bg-sidebar) !important; border-right: 1px solid var(--border); }
-section[data-testid="stSidebar"] * { color: var(--text-primary) !important; }
-section[data-testid="stSidebar"] .stRadio label { font-size: 14px; }
-
-.stButton > button[kind="primary"] {
-    background: linear-gradient(135deg, var(--brown-mid) 0%, var(--brown-accent) 100%) !important;
-    color: #fff !important;
-    border: 1px solid var(--brown-accent) !important;
-    border-radius: 8px !important;
-    font-weight: 700 !important;
-    letter-spacing: .3px;
-    transition: all .2s ease !important;
-}
-.stButton > button[kind="primary"]:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 18px var(--brown-glow) !important;
-}
-.stButton > button {
-    background: var(--bg-card) !important;
-    color: var(--text-primary) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    transition: all .2s ease !important;
-}
-.stButton > button:hover {
-    border-color: var(--brown-accent) !important;
-    color: var(--brown-bright) !important;
-    transform: translateY(-1px) !important;
-}
-.stTextInput input, .stSelectbox > div > div, .stTextArea textarea {
-    background-color: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    color: var(--text-primary) !important;
-}
-.stTextInput input:focus, .stSelectbox > div > div:focus-within, .stTextArea textarea:focus {
-    border-color: var(--brown-accent) !important;
-    box-shadow: 0 0 0 3px var(--brown-glow) !important;
-}
-.title-input input {
-    font-weight: 700 !important;
-    font-size: 16px !important;
-    color: var(--brown-bright) !important;
-    padding: 2px 8px !important;
-    background: transparent !important;
-    border: 1px dashed #21262d !important;
-}
-.title-input input:focus { border: 1px dashed var(--brown-accent) !important; }
-
-[data-testid="stDataEditor"] [data-testid="glideDataEditor"] .gdg-header-cell,
-[data-testid="stDataEditor"] .dvn-stack .gdg-header {
-    background-color: var(--brown-dark) !important;
-    color: var(--text-header) !important;
-}
-
-[data-testid="stDataEditor"] {
-    border-radius: 10px !important;
-    overflow: hidden;
-    border: 1px solid var(--brown-mid) !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,.4);
-    font-size: 12px !important;
-}
-[data-testid="stDataEditor"] .gdg-cell.gdg-selected,
-[data-testid="stDataEditor"] .gdg-cell[data-state="focused"],
-[data-testid="stDataEditor"] .gdg-cell[aria-selected="true"] {
-    background-color: var(--row-selected) !important;
-    outline: 2px solid var(--brown-accent) !important;
-    outline-offset: -2px;
-}
-[data-testid="stDataEditor"] .gdg-row:hover .gdg-cell { background-color: var(--row-hover) !important; }
-
-div[data-testid="stVerticalBlockBorderWrapper"] {
-    background-color: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 12px !important;
-    transition: box-shadow .25s ease, border-color .25s ease;
-}
-div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-    border-color: var(--brown-mid) !important;
-    box-shadow: 0 6px 24px rgba(0,0,0,.35) !important;
-}
-[data-testid="stMetric"] {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 10px;
-}
-[data-testid="stMetricValue"] { color: var(--brown-bright) !important; font-weight: 700; font-size: 1.8rem !important; }
-[data-testid="stMetricLabel"] { color: var(--text-muted) !important; }
-
-.topbar-loja {
-    background: linear-gradient(90deg, var(--brown-dark) 0%, #1c140d 100%);
-    border: 1px solid var(--brown-mid);
-    border-radius: 10px;
-    padding: 10px 18px;
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.topbar-left { display: flex; align-items: center; gap: 12px; }
-.topbar-title { font-size: 18px; font-weight: 700; color: var(--text-header); }
-.topbar-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-.erp-badge { background-color: #2ea043; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; margin-left: 8px;}
-
-/* IMPRESSÃO */
-@media print {
-    @page { size: landscape; margin: 5mm; }
-
-    html, body, .stApp, #root, [data-testid="stAppViewContainer"], [data-testid="stMainBlockContainer"], .main, .block-container {
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-        margin-top: 0 !important;
-        background-color: #ffffff !important;
-        background-image: none !important;
-        color: #000000 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-
-    header, [data-testid="stSidebar"], [data-testid="stHeader"] { display: none !important; }
-    [data-testid="stElementContainer"],
-    [data-testid="stHorizontalBlock"],
-    div[data-testid="stVerticalBlockBorderWrapper"] { display: none !important; }
-    
-    [data-testid="stElementContainer"]:has(#print-section) { display: block !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
-    
-    #print-section { display: block !important; width: 100% !important; margin-top: 0 !important; padding-top: 0 !important; }
-    #print-section h2 { font-size: 14px !important; margin: 0 0 6px 0 !important; padding-bottom: 3px !important; border-bottom: 2px solid #000 !important; color: #000 !important; display: block !important; text-align: center !important; }
-    #print-section h3 { font-size: 11px !important; font-weight: 700 !important; border-bottom: none !important; margin-top: 10px !important; margin-bottom: 3px !important; color: #000 !important; }
-    .print-container { width: 100% !important; display: block !important; }
-
-    table.print-table { width: 100% !important; border-collapse: collapse !important; color: #000000 !important; font-family: 'IBM Plex Sans', sans-serif !important; line-height: 1.2 !important; display: table !important; table-layout: fixed !important; margin-bottom: 5px !important; }
-    table.print-table th, table.print-table td { border: 1px solid #444 !important; padding: 3px !important; color: #000000 !important; background-color: #ffffff !important; overflow: hidden !important; text-overflow: ellipsis !important; }
-    table.print-table td { white-space: nowrap !important; }
-    table.print-table th { background-color: #d5d5d5 !important; font-weight: bold !important; text-align: center !important; white-space: normal !important; word-break: break-word !important; vertical-align: middle !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    table.print-table tr { break-inside: avoid !important; page-break-inside: avoid !important; }
-
-    /* LOJAS */
-    table.print-loja { font-size: 10px !important; }
-    table.print-loja th:nth-child(1), table.print-loja td:nth-child(1) { width: 15% !important; text-align: left !important; }
-    table.print-loja th:nth-child(2), table.print-loja td:nth-child(2) { width: 10% !important; text-align: center !important; }
-    table.print-loja th:nth-child(3), table.print-loja td:nth-child(3) { width: 50% !important; text-align: left !important; }
-    table.print-loja th:nth-child(4), table.print-loja td:nth-child(4) { width: 10% !important; text-align: center !important; }
-    table.print-loja th:nth-child(5), table.print-loja td:nth-child(5) { width: 15% !important; text-align: center !important; font-weight: bold !important; background-color: #eeeeee !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-
-    /* FORNECEDOR / MATRICIAL */
-    table.print-forn { font-size: 9.5px !important; } 
-    table.print-forn th:nth-child(1), table.print-forn td:nth-child(1) { width: 8% !important; text-align: center !important; }
-    table.print-forn th:nth-child(2), table.print-forn td:nth-child(2) { width: 36% !important; text-align: left !important; }
-    table.print-forn th:nth-child(n+3):nth-child(-n+10),
-    table.print-forn td:nth-child(n+3):nth-child(-n+10) { width: 7% !important; text-align: center !important; }
-
-    /* SEPARAÇÃO */
-    table.print-sep { font-size: 8.5px !important; }
-    table.print-sep th:nth-child(1), table.print-sep td:nth-child(1) { width: 14% !important; text-align: left !important; }
-    table.print-sep th:nth-child(2), table.print-sep td:nth-child(2) { width: 6%  !important; text-align: center !important; }
-    table.print-sep th:nth-child(3), table.print-sep td:nth-child(3) { width: 24% !important; text-align: left !important; }
-    table.print-sep th:nth-child(n+4):nth-child(-n+11),
-    table.print-sep td:nth-child(n+4):nth-child(-n+11) { width: 7% !important; text-align: center !important; }
-}
-
-@media screen {
-    #print-section { display: none !important; }
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ─────────────────────────────────────────────
 # FUNÇÃO PARA EXTRAIR APENAS NÚMEROS (TRATAR CX, UND, KG)
 # ─────────────────────────────────────────────
 def extrair_numero_quantidade(valor):
@@ -268,7 +54,6 @@ produtos_iniciais = [
     {"Fornecedor": "Dona Rita", "Código": 637929, "Descrição Oficial": "Emb D32r Torta Preta Tampa Media 750g C/100", "Nome Personalizado": ""},
 ]
 
-
 # ─────────────────────────────────────────────
 # FUNÇÃO DE ESTILIZAÇÃO DE EXCEL COM CORES E OBS
 # ─────────────────────────────────────────────
@@ -278,7 +63,6 @@ def gerar_excel_estilizado(df, sheet_name="Resumo", df_obs=None):
         df.to_excel(writer, index=False, sheet_name=sheet_name)
         worksheet = writer.sheets[sheet_name]
 
-        # Estilos com as cores do App (Marrom / Caramelo)
         header_fill = PatternFill(start_color='8B5A2B', end_color='8B5A2B', fill_type='solid') 
         alt_row_fill = PatternFill(start_color='FAF5F0', end_color='FAF5F0', fill_type='solid') 
         header_font = Font(color='FFFFFF', bold=True)
@@ -299,30 +83,24 @@ def gerar_excel_estilizado(df, sheet_name="Resumo", df_obs=None):
                 else:
                     if row_idx % 2 == 0:
                         cell.fill = alt_row_fill
-                    
                     if isinstance(cell.value, (int, float)):
                         cell.alignment = Alignment(horizontal='center', vertical='center')
                     else:
                         cell.alignment = Alignment(horizontal='left', vertical='center')
 
-        # Autoajuste de largura das colunas
         for col in worksheet.columns:
             max_length = 0
             col_letter = col[0].column_letter
-            
             for cell in col:
                 try:
                     if len(str(cell.value)) > max_length:
                         max_length = len(str(cell.value))
                 except:
                     pass
-            
             worksheet.column_dimensions[col_letter].width = max_length + 2
 
-        # Inserir Observações no Final da Planilha se houver
         if df_obs is not None and not df_obs.empty:
             start_row = worksheet.max_row + 3
-            
             cell_title = worksheet.cell(row=start_row, column=1, value="OBSERVAÇÕES GERAIS DAS LOJAS")
             cell_title.font = Font(bold=True, color="8B5A2B")
             
@@ -340,7 +118,6 @@ def gerar_excel_estilizado(df, sheet_name="Resumo", df_obs=None):
                 cloja.border = border_style; cobs.border = border_style
                 cloja.alignment = Alignment(horizontal='center', vertical='center')
 
-        # 🖨️ CONFIGURAÇÃO AUTOMÁTICA DE IMPRESSÃO
         worksheet.sheet_properties.pageSetUpPr.fitToPage = True
         worksheet.page_setup.fitToWidth = 1
         worksheet.page_setup.fitToHeight = False
@@ -351,7 +128,6 @@ def gerar_excel_estilizado(df, sheet_name="Resumo", df_obs=None):
         worksheet.page_margins.bottom = 0.75
 
     return buffer.getvalue()
-
 
 # ─────────────────────────────────────────────
 # CONEXÃO GOOGLE SHEETS & FUNÇÕES DE DADOS
@@ -379,7 +155,7 @@ def carregar_obs():
         try:
             conn.update(worksheet=WS_OBS, data=df_obs)
         except Exception:
-            pass # Ignora erro caso não consiga criar a aba sozinho
+            pass
             
     if "Observacao" not in df_obs.columns:
         df_obs["Observacao"] = ""
@@ -403,7 +179,7 @@ def carregar_catalogo_embalagem():
         df = conn.read(worksheet=WS_PRODUTOS, ttl=0, usecols=list(range(20)))
     except ValueError as e:
         if "Spreadsheet must be specified" in str(e):
-            st.error("🚨 **Erro Crítico:** URL da Planilha não especificada nas configurações do Streamlit Cloud (Secrets).")
+            st.error("🚨 **Erro Crítico:** URL da Planilha não especificada nas configurações.")
             st.stop()
         else:
             raise e
@@ -454,19 +230,12 @@ def carregar_catalogo_embalagem():
         return str(row.get("Descrição Oficial", "")).strip()
 
     df["Descrição"] = df.apply(obter_nome_final, axis=1)
-
     return df
 
 @st.cache_data(ttl=15)
 def carregar_pedidos():
     try:
         df_pedidos = conn.read(worksheet=WS_PEDIDOS, ttl=0)
-    except ValueError as e:
-        if "Spreadsheet must be specified" in str(e):
-            st.error("🚨 **Erro Crítico:** URL da Planilha não especificada nas configurações.")
-            st.stop()
-        else:
-            raise e
     except Exception as e:
         st.error(f"Erro ao conectar na aba {WS_PEDIDOS}: {e}")
         st.stop()
@@ -489,7 +258,6 @@ def carregar_pedidos():
 
     for loja in LOJAS:
         if loja in df_pedidos.columns:
-            # Transforma tudo que for 0 puramente em string vazia ("")
             df_pedidos[loja] = df_pedidos[loja].fillna("").astype(str).apply(lambda x: "" if str(x).strip() in ["0", "0.0", "0,0"] else x)
         else:
             df_pedidos[loja] = ""
@@ -505,412 +273,398 @@ def salvar_catalogo(df_to_save):
     conn.update(worksheet=WS_PRODUTOS, data=df_clean)
     st.cache_data.clear()
 
-# ─────────────────────────────────────────────
-# SISTEMA DE LOGIN
-# ─────────────────────────────────────────────
-if st.session_state['usuario_logado_embalagem'] is None:
-    st.write("<br><br>", unsafe_allow_html=True)
-    _, col2, _ = st.columns([1, 1.4, 1])
-    with col2:
-        with st.container(border=True):
-            h1, h2 = st.columns([4, 1])
-            with h1:
-                st.markdown("""
-                    <h2 style='margin-bottom:0'>Portal de Pedidos</h2>
-                    <p style='color:#7d8590;font-size:14px;margin-top:4px'>Embalagens — Molicenter</p>
-                """, unsafe_allow_html=True)
-            with h2:
-                st.write("")
-                try:
-                    st.image("passaro_logo.png", width=60)
-                except Exception:
-                    st.markdown("📦", unsafe_allow_html=True)
 
-            st.divider()
-            usuarios_permitidos = ["Selecione..."] + ["Administrador"] + LOJAS
-            usuario_selecionado = st.selectbox("👤 Usuário de acesso:", usuarios_permitidos)
+# ─────────────────────────────────────────────────────────────
+# MÓDULO PRINCIPAL - A FUNÇÃO QUE O MAIN.PY VAI CHAMAR
+# ─────────────────────────────────────────────────────────────
+def iniciar_tela():
 
-            senha_digitada = st.text_input("🔑 Senha de acesso:", type="password", autocomplete="off")
+    if 'reset_counter_embalagem' not in st.session_state:
+        st.session_state['reset_counter_embalagem'] = 0
 
-            st.write("<br>", unsafe_allow_html=True)
+    usuario_atual = st.session_state.get('usuario_logado', None)
+    acesso_total  = (usuario_atual == "Administrador")
 
-            if st.button("Entrar no Sistema", type="primary", use_container_width=True):
-                if usuario_selecionado == "Selecione...":
-                    st.error("⚠️ Por favor, selecione um usuário.")
-                elif usuario_selecionado == "Administrador" and senha_digitada == "moli0000":
-                    st.session_state['usuario_logado_embalagem'] = usuario_selecionado
-                    st.rerun()
-                elif usuario_selecionado in LOJAS and senha_digitada == "moli1234":
-                    st.session_state['usuario_logado_embalagem'] = usuario_selecionado
-                    st.rerun()
-                elif senha_digitada:
-                    st.error("⚠️ Senha incorreta. Tente novamente.")
-
-            st.markdown('<p style="font-size: 11px; color: #7d8590; text-align: center; margin-top: 10px;">🔒 Acesso restrito — Molicenter © 2026</p>', unsafe_allow_html=True)
-    st.stop()
-
-# ─────────────────────────────────────────────
-# PÓS-LOGIN
-# ─────────────────────────────────────────────
-usuario_atual = st.session_state['usuario_logado_embalagem']
-acesso_total  = usuario_atual == "Administrador"
-
-if not acesso_total:
+    # CSS Global e de Impressão encapsulado
     st.markdown("""
     <style>
-        section[data-testid="stSidebar"] { display: none !important; }
-        [data-testid="collapsedControl"]  { display: none !important; }
-        .main .block-container { max-width: 100% !important; padding-left: 2.5rem !important; padding-right: 2.5rem !important; }
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;700&display=swap');
+
+    :root {
+        --bg-main:        #0d1117;
+        --bg-card:        #161b22;
+        --bg-sidebar:     #0d1117;
+        --brown-dark:     #3a2610; 
+        --brown-mid:      #8b5a2b; 
+        --brown-accent:   #cd853f; 
+        --brown-bright:   #eebb88; 
+        --brown-glow:     rgba(205, 133, 63, .25);
+        --text-primary:   #e6edf3;
+        --text-muted:     #7d8590;
+        --text-header:    #f5deb3; 
+        --border:         #21262d;
+        --border-active:  #cd853f;
+        --row-hover:      rgba(205, 133, 63, .08);
+        --row-selected:   rgba(205, 133, 63, .18);
+    }
+
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, var(--brown-mid) 0%, var(--brown-accent) 100%) !important;
+        color: #fff !important; border: 1px solid var(--brown-accent) !important;
+    }
+    .stButton > button[kind="primary"]:hover {
+        box-shadow: 0 4px 18px var(--brown-glow) !important;
+    }
+    .stTextInput input:focus, .stSelectbox > div > div:focus-within, .stTextArea textarea:focus {
+        border-color: var(--brown-accent) !important;
+        box-shadow: 0 0 0 3px var(--brown-glow) !important;
+    }
+    .title-input input { color: var(--brown-bright) !important; }
+    .title-input input:focus { border: 1px dashed var(--brown-accent) !important; }
+
+    [data-testid="stDataEditor"] [data-testid="glideDataEditor"] .gdg-header-cell,
+    [data-testid="stDataEditor"] .dvn-stack .gdg-header {
+        background-color: var(--brown-dark) !important;
+        color: var(--text-header) !important;
+    }
+    [data-testid="stDataEditor"] { border: 1px solid var(--brown-mid) !important; }
+    [data-testid="stDataEditor"] .gdg-cell.gdg-selected,
+    [data-testid="stDataEditor"] .gdg-cell[data-state="focused"],
+    [data-testid="stDataEditor"] .gdg-cell[aria-selected="true"] {
+        background-color: var(--row-selected) !important;
+        outline: 2px solid var(--brown-accent) !important;
+    }
+    [data-testid="stDataEditor"] .gdg-row:hover .gdg-cell { background-color: var(--row-hover) !important; }
+
+    div[data-testid="stVerticalBlockBorderWrapper"]:hover { border-color: var(--brown-mid) !important; }
+    [data-testid="stMetricValue"] { color: var(--brown-bright) !important; }
+
+    .topbar-loja {
+        background: linear-gradient(90deg, var(--brown-dark) 0%, #1c140d 100%);
+        border: 1px solid var(--brown-mid); border-radius: 10px; padding: 10px 18px;
+        margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-title { font-size: 18px; font-weight: 700; color: var(--text-header); }
+    .topbar-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .erp-badge { background-color: #2ea043; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; margin-left: 8px;}
+
+    /* IMPRESSÃO */
+    @media print {
+        @page { size: landscape; margin: 5mm; }
+        html, body, .stApp, #root, [data-testid="stAppViewContainer"], [data-testid="stMainBlockContainer"], .main, .block-container {
+            padding-top: 0 !important; padding-bottom: 0 !important; margin-top: 0 !important;
+            background-color: #ffffff !important; background-image: none !important; color: #000000 !important;
+            width: 100% !important; max-width: 100% !important;
+        }
+        header, [data-testid="stSidebar"], [data-testid="stHeader"] { display: none !important; }
+        [data-testid="stElementContainer"], [data-testid="stHorizontalBlock"], div[data-testid="stVerticalBlockBorderWrapper"] { display: none !important; }
+        [data-testid="stElementContainer"]:has(#print-section) { display: block !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
+        #print-section { display: block !important; width: 100% !important; margin-top: 0 !important; padding-top: 0 !important; }
+        #print-section h2 { font-size: 14px !important; margin: 0 0 6px 0 !important; padding-bottom: 3px !important; border-bottom: 2px solid #000 !important; color: #000 !important; display: block !important; text-align: center !important; }
+        #print-section h3 { font-size: 11px !important; font-weight: 700 !important; border-bottom: none !important; margin-top: 10px !important; margin-bottom: 3px !important; color: #000 !important; }
+        .print-container { width: 100% !important; display: block !important; }
+        table.print-table { width: 100% !important; border-collapse: collapse !important; color: #000000 !important; font-family: 'IBM Plex Sans', sans-serif !important; line-height: 1.2 !important; display: table !important; table-layout: fixed !important; margin-bottom: 5px !important; }
+        table.print-table th, table.print-table td { border: 1px solid #444 !important; padding: 3px !important; color: #000000 !important; background-color: #ffffff !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+        table.print-table td { white-space: nowrap !important; }
+        table.print-table th { background-color: #d5d5d5 !important; font-weight: bold !important; text-align: center !important; white-space: normal !important; word-break: break-word !important; vertical-align: middle !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        table.print-table tr { break-inside: avoid !important; page-break-inside: avoid !important; }
+
+        table.print-loja { font-size: 10px !important; }
+        table.print-loja th:nth-child(1), table.print-loja td:nth-child(1) { width: 15% !important; text-align: left !important; }
+        table.print-loja th:nth-child(2), table.print-loja td:nth-child(2) { width: 10% !important; text-align: center !important; }
+        table.print-loja th:nth-child(3), table.print-loja td:nth-child(3) { width: 50% !important; text-align: left !important; }
+        table.print-loja th:nth-child(4), table.print-loja td:nth-child(4) { width: 10% !important; text-align: center !important; }
+        table.print-loja th:nth-child(5), table.print-loja td:nth-child(5) { width: 15% !important; text-align: center !important; font-weight: bold !important; background-color: #eeeeee !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+        table.print-forn { font-size: 9.5px !important; } 
+        table.print-forn th:nth-child(1), table.print-forn td:nth-child(1) { width: 8% !important; text-align: center !important; }
+        table.print-forn th:nth-child(2), table.print-forn td:nth-child(2) { width: 36% !important; text-align: left !important; }
+        table.print-forn th:nth-child(n+3):nth-child(-n+10), table.print-forn td:nth-child(n+3):nth-child(-n+10) { width: 7% !important; text-align: center !important; }
+
+        table.print-sep { font-size: 8.5px !important; }
+        table.print-sep th:nth-child(1), table.print-sep td:nth-child(1) { width: 14% !important; text-align: left !important; }
+        table.print-sep th:nth-child(2), table.print-sep td:nth-child(2) { width: 6%  !important; text-align: center !important; }
+        table.print-sep th:nth-child(3), table.print-sep td:nth-child(3) { width: 24% !important; text-align: left !important; }
+        table.print-sep th:nth-child(n+4):nth-child(-n+11), table.print-sep td:nth-child(n+4):nth-child(-n+11) { width: 7% !important; text-align: center !important; }
+    }
+    @media screen { #print-section { display: none !important; } }
     </style>
     """, unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────
-# SIDEBAR
-# ─────────────────────────────────────────────
-with st.sidebar:
-    try:
-        st.image("passaro_logo.png", width=72)
-    except Exception:
-        st.markdown("📦")
+    if not acesso_total:
+        st.markdown("""
+        <style>
+            section[data-testid="stSidebar"] { display: none !important; }
+            [data-testid="collapsedControl"]  { display: none !important; }
+            .main .block-container { max-width: 100% !important; padding-left: 2.5rem !important; padding-right: 2.5rem !important; }
+        </style>
+        """, unsafe_allow_html=True)
 
-    st.markdown(f"### Olá, *{usuario_atual}*")
-    st.caption("Sistema de Pedidos — Embalagens")
-    st.divider()
-
-    if acesso_total:
-        perfil_navegacao = st.radio("📍 Navegação:", [
-            "Visão por Fornecedor (Resumo)",
-            "Separação e Fechamento",
-            "Visão das Lojas",
-            "Catálogo de Produtos"
-        ])
-    else:
-        perfil_navegacao = "Visão das Lojas"
-
-    st.divider()
-
-    df_ped = carregar_pedidos()
-    if not df_ped.empty and set(LOJAS).issubset(df_ped.columns):
-        # Transforma tudo para numero (limpando letras) para ver se tem item preenchido usando .map
-        temp_sum = df_ped[LOJAS].map(extrair_numero_quantidade)
-        total_preenchidos = (temp_sum > 0).any(axis=1).sum()
-    else:
-        total_preenchidos = 0
-
-    st.metric("Itens c/ pedido", total_preenchidos, help="Itens com ao menos 1 quantidade preenchida")
-
-    st.divider()
-
-    if st.button("🔄 Sincronizar Dados", use_container_width=True):
-        st.cache_data.clear()
-        st.session_state['reset_counter_embalagem'] += 1
-        st.rerun()
-
-    st.write("<br>", unsafe_allow_html=True)
-
-    if st.button("🚪 Sair / Logout", use_container_width=True):
-        st.session_state['usuario_logado_embalagem'] = None
-        st.rerun()
-
-# ─────────────────────────────────────────────
-# FUNÇÃO MODAL DE CONFIRMAÇÃO PARA ZERAR
-# ─────────────────────────────────────────────
-@st.dialog("🚨 Confirmação Necessária")
-def modal_zerar_pedidos():
-    st.markdown("Tem certeza que deseja **zerar todos os pedidos e observações** de todas as lojas?")
-    st.markdown("⚠️ *Esta ação irá limpar as quantidades diretamente no Google Sheets.*")
-
-    st.write("<br>", unsafe_allow_html=True)
-    c1, c2 = st.columns(2)
-    with c1:
-        if st.button("❌ Não, cancelar", use_container_width=True):
-            st.rerun()
-    with c2:
-        if st.button("✔️ Sim, zerar tudo", type="primary", use_container_width=True):
-            st.session_state['reset_counter_embalagem'] += 1
-            df_main = carregar_pedidos()
-            for loja in LOJAS:
-                if loja in df_main.columns:
-                    df_main[loja] = ""
-            salvar_pedidos(df_main)
-            
-            df_obs = carregar_obs()
-            df_obs["Observacao"] = ""
-            salvar_obs(df_obs)
-            
-            st.rerun()
-
-# ─────────────────────────────────────────────
-# ROTA 1 — SEPARAÇÃO E FECHAMENTO (Admin)
-# ─────────────────────────────────────────────
-if perfil_navegacao == "Separação e Fechamento":
-    st.markdown("""
-    <div class="page-header hide-print" style="background: linear-gradient(90deg, var(--brown-dark) 0%, #1c140d 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
-        <span style="font-size: 26px; margin-right: 12px;">📊</span>
-        <div style="display: inline-block; vertical-align: top;">
-            <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Separação e Fechamento — Embalagens</div>
-            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Consolidado geral de quantidades por Categoria e Código</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    with st.container(border=True):
-        df_base = carregar_pedidos()
-
-        if df_base.empty:
-            st.warning("A base de pedidos está vazia. Cadastre produtos no Catálogo primeiro.")
-            st.stop()
-
-        cols_order = ["Fornecedor", "Código", "Descrição"] + LOJAS
-        df_exibir = df_base[cols_order]
-
-        # --- BUSCA NA TELA DE SEPARAÇÃO ---
-        termo_busca_sep = st.text_input("🔍 Buscar Produto (por Código ou Nome):", placeholder="Digite aqui para filtrar a lista abaixo...", key="busca_sep")
-        if termo_busca_sep:
-            mask = df_exibir["Descrição"].str.contains(termo_busca_sep, case=False, na=False) | \
-                   df_exibir["Código"].astype(str).str.contains(termo_busca_sep, case=False, na=False)
-            df_exibir = df_exibir[mask]
-            st.caption("⚠️ *Aviso: Salve suas alterações antes de limpar a busca, para não perder as edições atuais.*")
-        # ----------------------------------
-
-        # Cálculo Dinâmico de Altura
-        altura_dinamica = min(600, max(100, int(len(df_exibir) * 35.5) + 42))
-
-        col_cfg = {
-            "Fornecedor":  st.column_config.TextColumn("Categoria", disabled=True),
-            "Código":      st.column_config.NumberColumn("Cód.", width=80, format="%d", disabled=True),
-            "Descrição":   st.column_config.TextColumn("Produto", disabled=True),
-        }
-        # As colunas de lojas agora são TextColumn para permitirem ver as letras e números
-        for loja, novo_nome in MAPA_LOJAS.items():
-            col_cfg[loja] = st.column_config.TextColumn(novo_nome)
-
-        df_editado = st.data_editor(
-            df_exibir,
-            hide_index=True,
-            use_container_width=True,
-            height=altura_dinamica,
-            column_config=col_cfg,
-            key=f"sep_editor_{st.session_state['reset_counter_embalagem']}"
-        )
-
-        html_table = df_editado.to_html(index=False, classes=["print-table", "print-sep"])
-        st.markdown(f"""<div id="print-section">
-<h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
-    Resumo de Separação — Embalagens
-</h2>
-<div class="print-container">
-{html_table}
-</div>
-</div>""", unsafe_allow_html=True)
-
-        st.divider()
-        col_salvar, col_csv, col_excel, col_print, col_zerar = st.columns([2.5, 1.2, 1.2, 1.5, 2.5])
-
-        with col_salvar:
-            if st.button("💾 Salvar Alterações", type="primary", use_container_width=True):
-                df_to_save = carregar_pedidos()
-                for _, row_edit in df_editado.iterrows():
-                    mask = (df_to_save["Fornecedor"] == row_edit["Fornecedor"]) & (df_to_save["Código"] == row_edit["Código"])
-                    for loja in LOJAS:
-                        # Salva o texto que foi alterado pelo admin
-                        df_to_save.loc[mask, loja] = str(row_edit[loja])
+    # ─────────────────────────────────────────────
+    # FUNÇÃO MODAL DE CONFIRMAÇÃO PARA ZERAR
+    # ─────────────────────────────────────────────
+    @st.dialog("🚨 Confirmação Necessária")
+    def modal_zerar_pedidos():
+        st.markdown("Tem certeza que deseja **zerar todos os pedidos e observações** de todas as lojas?")
+        st.markdown("⚠️ *Esta ação irá limpar as quantidades diretamente no Google Sheets.*")
+        st.write("<br>", unsafe_allow_html=True)
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("❌ Não, cancelar", use_container_width=True):
+                st.rerun()
+        with c2:
+            if st.button("✔️ Sim, zerar tudo", type="primary", use_container_width=True):
+                st.session_state['reset_counter_embalagem'] += 1
+                df_main = carregar_pedidos()
+                for loja in LOJAS:
+                    if loja in df_main.columns:
+                        df_main[loja] = ""
+                salvar_pedidos(df_main)
                 
-                salvar_pedidos(df_to_save)
-                st.success("✅ Pedidos salvos na nuvem com sucesso!")
+                df_obs = carregar_obs()
+                df_obs["Observacao"] = ""
+                salvar_obs(df_obs)
                 st.rerun()
 
-        df_obs_print = carregar_obs()
-        df_obs_filtrado = df_obs_print[df_obs_print["Observacao"].str.strip() != ""]
-
-        with col_csv:
-            df_csv = df_editado.copy().rename(columns=MAPA_LOJAS)
-            csv = df_csv.to_csv(index=False).encode("utf-8")
-            st.download_button("⬇️ CSV", data=csv, file_name="separacao_embalagem.csv", mime="text/csv", use_container_width=True)
-
-        with col_excel:
-            df_exp = df_editado.copy().rename(columns=MAPA_LOJAS)
-            excel_data = gerar_excel_estilizado(df_exp, "Separação Embalagens", df_obs=df_obs_filtrado)
-            st.download_button("⬇️ Excel", data=excel_data, file_name="separacao_embalagens.xlsx",
-                               mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                               use_container_width=True)
-
-        with col_print:
-            if st.button("🖨️ Imprimir", use_container_width=True):
-                components.html(
-                    "<script>"
-                    "var s=document.createElement('style');"
-                    "s.id='__sep_land__';"
-                    "s.innerHTML='@media print { @page { size: landscape; margin: 5mm; } html,body,.stApp,#root,[data-testid=\"stAppViewContainer\"],[data-testid=\"stMainBlockContainer\"],.main,.block-container { padding: 0 !important; margin: 0 !important; } }';"
-                    "window.parent.document.head.appendChild(s);"
-                    "window.parent.print();"
-                    "setTimeout(function(){"
-                    "var e=window.parent.document.getElementById('__sep_land__');"
-                    "if(e)e.remove();"
-                    "},3000);"
-                    "</script>",
-                    height=0
-                )
-
-        with col_zerar:
-            if st.button("🚨 Zerar Todos os Pedidos", use_container_width=True, key="btn_zerar_sep_emb"):
-                modal_zerar_pedidos()
-                
-        # --- TABELA DE OBSERVAÇÕES GERAIS ---
-        st.write("<br>", unsafe_allow_html=True)
-        st.markdown("### 📝 Observações das Lojas")
-        if not df_obs_filtrado.empty:
-            st.dataframe(df_obs_filtrado, hide_index=True, use_container_width=True)
+    # ─────────────────────────────────────────────
+    # SIDEBAR INTERNA
+    # ─────────────────────────────────────────────
+    with st.sidebar:
+        st.markdown(f"### Módulo: Embalagens")
+        if acesso_total:
+            perfil_navegacao = st.radio("📍 Navegação:", [
+                "Visão por Fornecedor (Resumo)",
+                "Separação e Fechamento",
+                "Visão das Lojas",
+                "Catálogo de Produtos"
+            ])
         else:
-            st.info("Nenhuma observação registrada nesta semana.")
+            perfil_navegacao = "Visão das Lojas"
 
-# ─────────────────────────────────────────────
-# ROTA 2 — VISÃO DAS LOJAS
-# ─────────────────────────────────────────────
-elif perfil_navegacao == "Visão das Lojas":
-    if acesso_total:
-        loja_selecionada = st.selectbox("👁️ Visualizar como:", LOJAS)
-    else:
-        loja_selecionada = usuario_atual
+        st.divider()
+        df_ped = carregar_pedidos()
+        if not df_ped.empty and set(LOJAS).issubset(df_ped.columns):
+            temp_sum = df_ped[LOJAS].map(extrair_numero_quantidade)
+            total_preenchidos = (temp_sum > 0).any(axis=1).sum()
+        else:
+            total_preenchidos = 0
 
-    col_info, col_logout = st.columns([8, 2])
-    with col_info:
-        id_loja = MAPA_LOJAS.get(loja_selecionada, loja_selecionada)
-        st.markdown(f"""
-        <div class="topbar-loja hide-print">
-            <div class="topbar-left">
-                <span style="font-size:22px">📦</span>
-                <div>
-                    <div class="topbar-title">{loja_selecionada} — Embalagens <span class="erp-badge">🟢 Conectado ao ERP</span></div>
-                    <div class="topbar-sub">Preencha a quantidade dos produtos e use o campo final para observações gerais.</div>
-                </div>
+        st.metric("Itens c/ pedido", total_preenchidos, help="Itens com ao menos 1 quantidade preenchida")
+        st.divider()
+
+    # ─────────────────────────────────────────────
+    # ROTA 1: SEPARAÇÃO E FECHAMENTO
+    # ─────────────────────────────────────────────
+    if perfil_navegacao == "Separação e Fechamento":
+        st.markdown("""
+        <div class="page-header hide-print" style="background: linear-gradient(90deg, var(--brown-dark) 0%, #1c140d 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+            <span style="font-size: 26px; margin-right: 12px;">📊</span>
+            <div style="display: inline-block; vertical-align: top;">
+                <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Separação e Fechamento — Embalagens</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Consolidado geral de quantidades por Categoria e Código</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
-    with col_logout:
-        st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
-        if st.button("🚪 Sair / Logout", use_container_width=True):
-            st.session_state['usuario_logado_embalagem'] = None
-            st.rerun()
 
-    df_cat = carregar_catalogo_embalagem()
-    df_cat_loja = df_cat[df_cat[loja_selecionada] == True].copy()
+        with st.container(border=True):
+            df_base = carregar_pedidos()
+            if df_base.empty:
+                st.warning("A base de pedidos está vazia. Cadastre produtos no Catálogo primeiro.")
+                st.stop()
 
-    if df_cat_loja.empty:
-        st.warning(f"Nenhum produto habilitado para a {loja_selecionada} no momento.")
-        st.stop()
+            cols_order = ["Fornecedor", "Código", "Descrição"] + LOJAS
+            df_exibir = df_base[cols_order]
 
-    df_all = carregar_pedidos()
-    
-    # Prepara as colunas que a loja vai ver e editar
-    df_loja_view = pd.merge(
-        df_cat_loja[["Fornecedor", "Código", "Descrição"]],
-        df_all[["Fornecedor", "Código", loja_selecionada]],
-        on=["Fornecedor", "Código"],
-        how="left"
-    )
-    # Garante que a coluna continue como string
-    df_loja_view[loja_selecionada] = df_loja_view[loja_selecionada].fillna("").astype(str)
-    
-    # Renomeando a coluna de quantidade
-    df_loja_view = df_loja_view.rename(columns={loja_selecionada: "Qtde"})
+            termo_busca_sep = st.text_input("🔍 Buscar Produto (por Código ou Nome):", placeholder="Digite aqui para filtrar a lista abaixo...", key="busca_sep")
+            if termo_busca_sep:
+                mask = df_exibir["Descrição"].str.contains(termo_busca_sep, case=False, na=False) | \
+                       df_exibir["Código"].astype(str).str.contains(termo_busca_sep, case=False, na=False)
+                df_exibir = df_exibir[mask]
+                st.caption("⚠️ *Aviso: Salve suas alterações antes de limpar a busca, para não perder as edições atuais.*")
 
-    # Puxar Estoque do Banco usando estoqueemb
-    try:
-        conn_pg = st.connection("banco_erp", type="sql")
-        mapa_banco_erp = {
-            "Loja 01": "001", "Loja 02": "002", "Loja 03": "003",
-            "Loja 04": "004", "Loja 05": "005", "Loja 06": "006",
-            "Loja 07": "007", "Loja 08": "008"
-        }
-        cod_empresa_banco = mapa_banco_erp.get(loja_selecionada, "001")
+            altura_dinamica = min(600, max(100, int(len(df_exibir) * 35.5) + 42))
 
-        query_erp = f"""
-            SELECT cade_codempresa,
-                   cade_codigo,
-                   cadp_descricao,
-                   estoqueemb as estoque
-            FROM "python_estoque"
-            WHERE cade_codempresa::text = '{cod_empresa_banco}'
-            ORDER BY cade_codempresa, cade_codigo
-        """
-        df_erp = conn_pg.query(query_erp, ttl=300)
+            col_cfg = {
+                "Fornecedor":  st.column_config.TextColumn("Categoria", disabled=True),
+                "Código":      st.column_config.NumberColumn("Cód.", width=80, format="%d", disabled=True),
+                "Descrição":   st.column_config.TextColumn("Produto", disabled=True),
+            }
+            for loja, novo_nome in MAPA_LOJAS.items():
+                col_cfg[loja] = st.column_config.TextColumn(novo_nome)
 
-        if not df_erp.empty:
-            df_erp = df_erp.rename(columns={"cade_codigo": "Código", "estoque": "Estoque"})
-            df_loja_view = pd.merge(df_loja_view, df_erp[["Código", "Estoque"]], on="Código", how="left")
-        else:
+            df_editado = st.data_editor(
+                df_exibir, hide_index=True, use_container_width=True, height=altura_dinamica, column_config=col_cfg,
+                key=f"sep_editor_{st.session_state['reset_counter_embalagem']}"
+            )
+
+            html_table = df_editado.to_html(index=False, classes=["print-table", "print-sep"])
+            st.markdown(f"""<div id="print-section">
+            <h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
+                Resumo de Separação — Embalagens
+            </h2>
+            <div class="print-container">{html_table}</div>
+            </div>""", unsafe_allow_html=True)
+
+            st.divider()
+            col_salvar, col_csv, col_excel, col_print, col_zerar = st.columns([2.5, 1.2, 1.2, 1.5, 2.5])
+
+            with col_salvar:
+                if st.button("💾 Salvar Alterações", type="primary", use_container_width=True):
+                    df_to_save = carregar_pedidos()
+                    for _, row_edit in df_editado.iterrows():
+                        mask = (df_to_save["Fornecedor"] == row_edit["Fornecedor"]) & (df_to_save["Código"] == row_edit["Código"])
+                        for loja in LOJAS:
+                            df_to_save.loc[mask, loja] = str(row_edit[loja])
+                    salvar_pedidos(df_to_save)
+                    st.success("✅ Pedidos salvos na nuvem com sucesso!")
+                    st.rerun()
+
+            df_obs_print = carregar_obs()
+            df_obs_filtrado = df_obs_print[df_obs_print["Observacao"].str.strip() != ""]
+
+            with col_csv:
+                df_csv = df_editado.copy().rename(columns=MAPA_LOJAS)
+                csv = df_csv.to_csv(index=False).encode("utf-8")
+                st.download_button("⬇️ CSV", data=csv, file_name="separacao_embalagem.csv", mime="text/csv", use_container_width=True)
+
+            with col_excel:
+                df_exp = df_editado.copy().rename(columns=MAPA_LOJAS)
+                excel_data = gerar_excel_estilizado(df_exp, "Separação Embalagens", df_obs=df_obs_filtrado)
+                st.download_button("⬇️ Excel", data=excel_data, file_name="separacao_embalagens.xlsx",
+                                   mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
+
+            with col_print:
+                if st.button("🖨️ Imprimir", use_container_width=True):
+                    components.html(
+                        "<script>"
+                        "var s=document.createElement('style');"
+                        "s.id='__sep_land__';"
+                        "s.innerHTML='@media print { @page { size: landscape; margin: 5mm; } html,body,.stApp,#root,[data-testid=\"stAppViewContainer\"],[data-testid=\"stMainBlockContainer\"],.main,.block-container { padding: 0 !important; margin: 0 !important; } }';"
+                        "window.parent.document.head.appendChild(s);"
+                        "window.parent.print();"
+                        "setTimeout(function(){var e=window.parent.document.getElementById('__sep_land__');if(e)e.remove();},3000);"
+                        "</script>", height=0
+                    )
+
+            with col_zerar:
+                if st.button("🚨 Zerar Todos os Pedidos", use_container_width=True, key="btn_zerar_sep_emb"):
+                    modal_zerar_pedidos()
+                    
+            st.write("<br>", unsafe_allow_html=True)
+            st.markdown("### 📝 Observações das Lojas")
+            if not df_obs_filtrado.empty:
+                st.dataframe(df_obs_filtrado, hide_index=True, use_container_width=True)
+            else:
+                st.info("Nenhuma observação registrada nesta semana.")
+
+    # ─────────────────────────────────────────────
+    # ROTA 2: VISÃO DAS LOJAS
+    # ─────────────────────────────────────────────
+    elif perfil_navegacao == "Visão das Lojas":
+        loja_selecionada = st.selectbox("👁️ Visualizar como:", LOJAS) if acesso_total else usuario_atual
+
+        col_info, col_logout = st.columns([8, 2])
+        with col_info:
+            id_loja = MAPA_LOJAS.get(loja_selecionada, loja_selecionada)
+            st.markdown(f"""
+            <div class="topbar-loja hide-print">
+                <div class="topbar-left">
+                    <span style="font-size:22px">📦</span>
+                    <div>
+                        <div class="topbar-title">{loja_selecionada} — Embalagens <span class="erp-badge">🟢 Conectado ao ERP</span></div>
+                        <div class="topbar-sub">Preencha a quantidade dos produtos e use o campo final para observações gerais.</div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col_logout:
+            st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
+            if st.button("🏠 Voltar ao Início", use_container_width=True):
+                st.session_state['modulo_ativo'] = 'Home'
+                st.rerun()
+
+        df_cat = carregar_catalogo_embalagem()
+        df_cat_loja = df_cat[df_cat[loja_selecionada] == True].copy()
+
+        if df_cat_loja.empty:
+            st.warning(f"Nenhum produto habilitado para a {loja_selecionada} no momento.")
+            st.stop()
+
+        df_all = carregar_pedidos()
+        df_loja_view = pd.merge(
+            df_cat_loja[["Fornecedor", "Código", "Descrição"]],
+            df_all[["Fornecedor", "Código", loja_selecionada]],
+            on=["Fornecedor", "Código"],
+            how="left"
+        )
+        df_loja_view[loja_selecionada] = df_loja_view[loja_selecionada].fillna("").astype(str)
+        df_loja_view = df_loja_view.rename(columns={loja_selecionada: "Qtde"})
+
+        try:
+            conn_pg = st.connection("banco_erp", type="sql")
+            mapa_banco_erp = {"Loja 01": "001", "Loja 02": "002", "Loja 03": "003", "Loja 04": "004", "Loja 05": "005", "Loja 06": "006", "Loja 07": "007", "Loja 08": "008"}
+            cod_empresa_banco = mapa_banco_erp.get(loja_selecionada, "001")
+
+            query_erp = f"""
+                SELECT cade_codempresa, cade_codigo, cadp_descricao, estoqueemb as estoque
+                FROM "python_estoque" WHERE cade_codempresa::text = '{cod_empresa_banco}' ORDER BY cade_codempresa, cade_codigo
+            """
+            df_erp = conn_pg.query(query_erp, ttl=300)
+
+            if not df_erp.empty:
+                df_erp = df_erp.rename(columns={"cade_codigo": "Código", "estoque": "Estoque"})
+                df_loja_view = pd.merge(df_loja_view, df_erp[["Código", "Estoque"]], on="Código", how="left")
+            else:
+                df_loja_view["Estoque"] = 0
+        except Exception as e:
             df_loja_view["Estoque"] = 0
 
-    except Exception as e:
-        if "No database configured" in str(e) or "missing" in str(e).lower():
-             st.error("⚠️ Aviso: As credenciais do banco_erp também precisam estar nos Secrets do Streamlit para puxar o estoque.")
-        else:
-             st.error(f"⚠️ Erro ao puxar dados do ERP PostgreSQL: {e}")
-        df_loja_view["Estoque"] = 0
+        df_loja_view["Estoque"] = df_loja_view["Estoque"].fillna(0).astype(int)
+        df_loja_view = df_loja_view[["Fornecedor", "Código", "Descrição", "Estoque", "Qtde"]]
 
-    df_loja_view["Estoque"] = df_loja_view["Estoque"].fillna(0).astype(int)
-    
-    # Reordenando para o usuário
-    df_loja_view = df_loja_view[["Fornecedor", "Código", "Descrição", "Estoque", "Qtde"]]
+        with st.container(border=True):
+            termo_busca_loja = st.text_input("🔍 Buscar Produto (por Código ou Nome):", placeholder="Digite aqui para filtrar a lista abaixo...", key="busca_lojas")
+            if termo_busca_loja:
+                mask = df_loja_view["Descrição"].str.contains(termo_busca_loja, case=False, na=False) | \
+                       df_loja_view["Código"].astype(str).str.contains(termo_busca_loja, case=False, na=False)
+                df_loja_view = df_loja_view[mask]
+                st.caption("⚠️ *Aviso: Salve o seu pedido antes de limpar ou alterar a busca, para não perder o que foi digitado.*")
 
-    with st.container(border=True):
-        # --- BARRA DE BUSCA ---
-        termo_busca_loja = st.text_input("🔍 Buscar Produto (por Código ou Nome):", placeholder="Digite aqui para filtrar a lista abaixo...", key="busca_lojas")
-        if termo_busca_loja:
-            mask = df_loja_view["Descrição"].str.contains(termo_busca_loja, case=False, na=False) | \
-                   df_loja_view["Código"].astype(str).str.contains(termo_busca_loja, case=False, na=False)
-            df_loja_view = df_loja_view[mask]
-            st.caption("⚠️ *Aviso: Salve o seu pedido antes de limpar ou alterar a busca, para não perder o que foi digitado.*")
-        # ---------------------------
+            altura_dinamica = min(600, max(100, int(len(df_loja_view) * 35.5) + 42))
 
-        # Cálculo Dinâmico de Altura
-        altura_dinamica = min(600, max(100, int(len(df_loja_view) * 35.5) + 42))
+            col_cfg_loja = {
+                "Fornecedor": st.column_config.TextColumn("Categoria", width=130, disabled=True),
+                "Código":     st.column_config.NumberColumn("Cód.", width=80, format="%d", disabled=True),
+                "Descrição":  st.column_config.TextColumn("Produto", width=300, disabled=True),
+                "Estoque":    st.column_config.NumberColumn("📦 Estoque", width=100, format="%d", disabled=True),
+                "Qtde":       st.column_config.TextColumn("🛒 Qtde", width=120),
+            }
 
-        col_cfg_loja = {
-            "Fornecedor": st.column_config.TextColumn("Categoria", width=130, disabled=True),
-            "Código":     st.column_config.NumberColumn("Cód.", width=80, format="%d", disabled=True),
-            "Descrição":  st.column_config.TextColumn("Produto", width=300, disabled=True),
-            "Estoque":    st.column_config.NumberColumn("📦 Estoque", width=100, format="%d", disabled=True),
-            # Qtde transformada em TextColumn para aceitar cx, und, kg
-            "Qtde":       st.column_config.TextColumn("🛒 Qtde", width=120),
-        }
-
-        with st.container():
             df_editado = st.data_editor(
-                df_loja_view,
-                column_config=col_cfg_loja,
-                hide_index=True,
-                use_container_width=True,
-                height=altura_dinamica,
-                key=f"loja_embalagem_{st.session_state['reset_counter_embalagem']}"
+                df_loja_view, column_config=col_cfg_loja, hide_index=True, use_container_width=True,
+                height=altura_dinamica, key=f"loja_embalagem_{st.session_state['reset_counter_embalagem']}"
             )
             
-        # --- CAMPO ÚNICO DE OBSERVAÇÃO ---
-        df_obs_atual = carregar_obs()
-        obs_existente = df_obs_atual.loc[df_obs_atual["Loja"] == loja_selecionada, "Observacao"].values
-        obs_texto_inicial = obs_existente[0] if len(obs_existente) > 0 else ""
-        
-        st.write("<br>", unsafe_allow_html=True)
-        nova_obs = st.text_area("📝 Observação Geral da Loja", value=obs_texto_inicial, height=80, placeholder="Caso necessite, digite alguma observação geral para esse pedido (ex: Grampos, Clipes, Sacolas extras, etc.)")
-        # ---------------------------------
+            df_obs_atual = carregar_obs()
+            obs_existente = df_obs_atual.loc[df_obs_atual["Loja"] == loja_selecionada, "Observacao"].values
+            obs_texto_inicial = obs_existente[0] if len(obs_existente) > 0 else ""
+            
+            st.write("<br>", unsafe_allow_html=True)
+            nova_obs = st.text_area("📝 Observação Geral da Loja", value=obs_texto_inicial, height=80, placeholder="Caso necessite, digite alguma observação geral para esse pedido (ex: Grampos, Clipes, Sacolas extras, etc.)")
 
         df_imprimir = df_editado.copy()
         df_imprimir = df_imprimir.rename(columns={"Estoque": "Est.", "Qtde": "Ped."})
         html_table_loja = df_imprimir.to_html(index=False, classes=["print-table", "print-loja"])
 
         st.markdown(f"""<div id="print-section">
-<h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
-    Resumo do Pedido — {loja_selecionada}
-</h2>
-<div class="print-container">
-{html_table_loja}
-</div>
-<br>
-<b>OBSERVAÇÃO GERAL:</b> {nova_obs}
-</div>""", unsafe_allow_html=True)
+            <h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
+                Resumo do Pedido — {loja_selecionada}
+            </h2>
+            <div class="print-container">{html_table_loja}</div>
+            <br><b>OBSERVAÇÃO GERAL:</b> {nova_obs}
+        </div>""", unsafe_allow_html=True)
 
-        # Na hora de calcular os totais de cobertura, limpamos as letras e usamos os números reais
         df_editado_nums = df_editado["Qtde"].map(extrair_numero_quantidade)
         itens_com_pedido = int((df_editado_nums > 0).sum())
         total_itens      = len(df_loja_view) 
@@ -936,29 +690,24 @@ elif perfil_navegacao == "Visão das Lojas":
                     "window.parent.document.head.appendChild(s);"
                     "window.parent.print();"
                     "setTimeout(function(){var e=window.parent.document.getElementById('__loja_print__');if(e)e.remove();},3000);"
-                    "</script>", 
-                    height=0
+                    "</script>", height=0
                 )
 
         with col_btn:
             st.write("<br>", unsafe_allow_html=True)
             if st.button("💾 Salvar Pedido e OBS", type="primary", use_container_width=True):
-                # Salva Peças
                 df_main = carregar_pedidos()
                 for _, row in df_editado.iterrows():
                     mask = (df_main["Fornecedor"] == row["Fornecedor"]) & (df_main["Código"] == row["Código"])
                     if mask.any():
-                        # Salva na nuvem EXATAMENTE o que o usuário escreveu (ex: '01 cx')
                         df_main.loc[mask, loja_selecionada] = str(row["Qtde"])
                     else:
                         nova_linha = {"Fornecedor": row["Fornecedor"], "Código": row["Código"], "Descrição": row["Descrição"]}
-                        for l in LOJAS: 
-                            nova_linha[l] = ""
+                        for l in LOJAS: nova_linha[l] = ""
                         nova_linha[loja_selecionada] = str(row["Qtde"])
                         df_main = pd.concat([df_main, pd.DataFrame([nova_linha])], ignore_index=True)
                 salvar_pedidos(df_main)
                 
-                # Salva OBS Geral
                 df_obs_save = carregar_obs()
                 mask_obs = df_obs_save["Loja"] == loja_selecionada
                 if mask_obs.any():
@@ -969,297 +718,254 @@ elif perfil_navegacao == "Visão das Lojas":
                 
                 st.success(f"✅ Pedido da {loja_selecionada} enviado para a nuvem com sucesso!")
 
-# ─────────────────────────────────────────────
-# ROTA 3 — VISÃO POR FORNECEDOR / RESUMO (Admin)
-# ─────────────────────────────────────────────
-elif perfil_navegacao == "Visão por Fornecedor (Resumo)":
-    st.markdown("""
-    <div class="hide-print" style="background: linear-gradient(90deg, var(--brown-dark) 0%, #1c140d 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
-        <span style="font-size: 26px; margin-right: 12px;">📦</span>
-        <div style="display: inline-block; vertical-align: top;">
-            <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Visão por Categoria — Embalagens</div>
-            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Resumo consolidado agrupado pelas categorias de produtos</div>
+    # ─────────────────────────────────────────────
+    # ROTA 3: VISÃO POR FORNECEDOR / RESUMO (Admin)
+    # ─────────────────────────────────────────────
+    elif perfil_navegacao == "Visão por Fornecedor (Resumo)":
+        st.markdown("""
+        <div class="hide-print" style="background: linear-gradient(90deg, var(--brown-dark) 0%, #1c140d 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+            <span style="font-size: 26px; margin-right: 12px;">📦</span>
+            <div style="display: inline-block; vertical-align: top;">
+                <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Visão por Categoria — Embalagens</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Resumo consolidado agrupado pelas categorias de produtos</div>
+            </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    df_all = carregar_pedidos()
-    df_cat = carregar_catalogo_embalagem()
+        df_all = carregar_pedidos()
+        df_cat = carregar_catalogo_embalagem()
 
-    if df_all.empty or df_cat.empty:
-        st.warning("Não há dados de pedidos ou catálogo preenchidos.")
-        st.stop()
+        if df_all.empty or df_cat.empty:
+            st.warning("Não há dados de pedidos ou catálogo preenchidos.")
+            st.stop()
 
-    nomes_forn = df_cat["Fornecedor"].dropna().unique().tolist()
+        nomes_forn = df_cat["Fornecedor"].dropna().unique().tolist()
+        html_print_content = ""
 
-    html_print_content = ""
+        for i in range(0, len(nomes_forn), 1):
+            cols = st.columns(1, gap="small")
+            for j, fornecedor in enumerate(nomes_forn[i:i+1]):
+                df_forn = df_all[df_all["Fornecedor"] == fornecedor].copy()
+                colunas_presentes = LOJAS
+                df_forn_view = df_forn[["Código", "Descrição"] + colunas_presentes].copy()
+                
+                lojas_renomeadas = {l: MAPA_LOJAS[l] for l in colunas_presentes}
+                df_forn_view = df_forn_view.rename(columns=lojas_renomeadas)
+                lojas_cols_renomeadas = [MAPA_LOJAS[l] for l in colunas_presentes]
 
-    for i in range(0, len(nomes_forn), 1):
-        cols = st.columns(1, gap="small")
-        for j, fornecedor in enumerate(nomes_forn[i:i+1]):
+                col_cfg_forn = {
+                    "Código":    st.column_config.NumberColumn("Cód.", width=80, format="%d", disabled=True),
+                    "Descrição": st.column_config.TextColumn("Produto", disabled=False),
+                }
+                for c in lojas_cols_renomeadas:
+                    col_cfg_forn[c] = st.column_config.TextColumn(c, disabled=False)
 
-            df_forn = df_all[df_all["Fornecedor"] == fornecedor].copy()
-            colunas_presentes = LOJAS
-            
-            df_forn_view = df_forn[["Código", "Descrição"] + colunas_presentes].copy()
-            
-            lojas_renomeadas = {l: MAPA_LOJAS[l] for l in colunas_presentes}
-            df_forn_view = df_forn_view.rename(columns=lojas_renomeadas)
-            lojas_cols_renomeadas = [MAPA_LOJAS[l] for l in colunas_presentes]
+                altura = min(600, max(100, int(len(df_forn_view) * 35.5) + 42))
 
-            col_cfg_forn = {
-                "Código":    st.column_config.NumberColumn("Cód.", width=80, format="%d", disabled=True),
-                "Descrição": st.column_config.TextColumn("Produto", disabled=False),
-            }
-            # Lojas como texto para ver os 'cx' e 'und' na tela final do admin
-            for c in lojas_cols_renomeadas:
-                col_cfg_forn[c] = st.column_config.TextColumn(c, disabled=False)
+                with cols[j]:
+                    with st.container(border=True):
+                        st.markdown('<div class="title-input">', unsafe_allow_html=True)
+                        st.text_input(
+                            "Categoria",
+                            value=f"📦 {fornecedor}",
+                            label_visibility="collapsed",
+                            key=f"title_forn_{fornecedor}_{st.session_state['reset_counter_embalagem']}"
+                        )
+                        st.markdown('</div>', unsafe_allow_html=True)
 
-            altura = min(600, max(100, int(len(df_forn_view) * 35.5) + 42))
+                        cols_order_forn = ["Código", "Descrição"] + lojas_cols_renomeadas
+                        df_forn_edit = st.data_editor(
+                            df_forn_view[cols_order_forn],
+                            hide_index=True,
+                            use_container_width=True,
+                            column_config=col_cfg_forn,
+                            height=altura,
+                            num_rows="fixed",
+                            key=f"forn_embalagem_{fornecedor}_{st.session_state['reset_counter_embalagem']}"
+                        )
 
-            with cols[j]:
-                with st.container(border=True):
-                    st.markdown('<div class="title-input">', unsafe_allow_html=True)
-                    st.text_input(
-                        "Categoria",
-                        value=f"📦 {fornecedor}",
-                        label_visibility="collapsed",
-                        key=f"title_forn_{fornecedor}_{st.session_state['reset_counter_embalagem']}"
-                    )
-                    st.markdown('</div>', unsafe_allow_html=True)
+                        df_forn_nums = df_forn_view[lojas_cols_renomeadas].map(extrair_numero_quantidade)
+                        total_geral = int(df_forn_nums.sum().sum())
+                        
+                        st.markdown(f"""
+                            <div style="text-align:right; font-weight:700; margin-top:6px; color:var(--brown-bright); font-size:15px;">
+                                Total Geral: {total_geral} unidades
+                            </div>
+                        """, unsafe_allow_html=True)
 
-                    cols_order_forn = ["Código", "Descrição"] + lojas_cols_renomeadas
-                    df_forn_edit = st.data_editor(
-                        df_forn_view[cols_order_forn],
-                        hide_index=True,
-                        use_container_width=True,
-                        column_config=col_cfg_forn,
-                        height=altura,
-                        num_rows="fixed",
-                        key=f"forn_embalagem_{fornecedor}_{st.session_state['reset_counter_embalagem']}"
-                    )
-
-                    # Calcula total da categoria só para exibir no cantinho e na impressão
-                    df_forn_nums = df_forn_view[lojas_cols_renomeadas].map(extrair_numero_quantidade)
-                    total_geral = int(df_forn_nums.sum().sum())
-                    
-                    st.markdown(f"""
-                        <div style="text-align:right; font-weight:700; margin-top:6px; color:var(--brown-bright); font-size:15px;">
-                            Total Geral: {total_geral} unidades
-                        </div>
-                    """, unsafe_allow_html=True)
-
-                    html_table = df_forn_edit.to_html(index=False, classes=["print-table", "print-forn"])
-                    for loja in LOJAS:
-                        partes = loja.split(" ")
-                        if len(partes) == 2:
-                            html_table = html_table.replace(
-                                f"<th>{loja}</th>",
-                                f"<th>{partes[0]}<br>{partes[1]}</th>"
-                            )
-                    html_print_content += f"<h3 style='color: black; margin-top: 10px; margin-bottom: 4px;'>📦 {fornecedor}</h3>\n"
-                    html_print_content += f"{html_table}\n"
-                    html_print_content += f"<div style='text-align:right; font-weight:bold; font-size:11px; margin-top:3px; margin-bottom: 8px; color: black;'>Total da Categoria: {total_geral} unidades</div>\n"
+                        html_table = df_forn_edit.to_html(index=False, classes=["print-table", "print-forn"])
+                        html_print_content += f"<h3 style='color: black; margin-top: 10px; margin-bottom: 4px;'>📦 {fornecedor}</h3>\n"
+                        html_print_content += f"{html_table}\n"
+                        html_print_content += f"<div style='text-align:right; font-weight:bold; font-size:11px; margin-top:3px; margin-bottom: 8px; color: black;'>Total da Categoria: {total_geral} unidades</div>\n"
 
         st.write("<br>", unsafe_allow_html=True)
 
-    st.markdown(f"""<div id="print-section">
-<h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
-    Visão por Categoria (Resumo) — Embalagens
-</h2>
-<div class="print-container">
-{html_print_content}
-</div>
-</div>""", unsafe_allow_html=True)
-
-    st.divider()
-    
-    # ─────────────────────────────────────────────
-    # BOTÕES DE EXPORTAÇÃO, IMPRESSÃO E LIMPEZA
-    # ─────────────────────────────────────────────
-    col_csv, col_excel, col_space, col_print, col_zerar = st.columns([1.5, 1.5, 2.0, 2.5, 2.5])
-    
-    df_obs_print = carregar_obs()
-    df_obs_filtrado = df_obs_print[df_obs_print["Observacao"].str.strip() != ""]
-    
-    # Unifica as informações para que tanto CSV quanto Excel usem os mesmos dados
-    df_export = pd.DataFrame()
-    for forn in nomes_forn:
-        df_f = df_all[df_all["Fornecedor"] == forn].copy()
-        if not df_f.empty:
-            df_export = pd.concat([df_export, df_f], ignore_index=True)
-            
-    if not df_export.empty:
-        cols_final_export = ["Código", "Descrição", "Fornecedor"] + LOJAS
-        df_export = df_export[cols_final_export]
-        df_export = df_export.rename(columns=MAPA_LOJAS)
-
-    with col_csv:
-        if not df_export.empty:
-            csv_str = df_export.to_csv(index=False).encode('utf-8')
-            st.download_button("⬇️ Exportar CSV", data=csv_str, file_name="visao_categoria_embalagens.csv", mime="text/csv", use_container_width=True)
-
-    with col_excel:
-        if not df_export.empty:
-            excel_data = gerar_excel_estilizado(df_export, "Visão Categorias", df_obs=df_obs_filtrado)
-            st.download_button("⬇️ Exportar Excel", data=excel_data, file_name="visao_categoria_embalagens.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
-
-    with col_print:
-        if st.button("🖨️ Imprimir Resumo Geral", use_container_width=True):
-            components.html(
-                "<script>"
-                "var s=document.createElement('style');"
-                "s.id='__forn_port__';"
-                "s.innerHTML='@media print { @page { size: landscape; margin: 5mm; } html,body,.stApp,#root,[data-testid=\"stAppViewContainer\"],[data-testid=\"stMainBlockContainer\"],.main,.block-container { padding: 0 !important; margin: 0 !important; } }';"
-                "window.parent.document.head.appendChild(s);"
-                "window.parent.print();"
-                "setTimeout(function(){"
-                "var e=window.parent.document.getElementById('__forn_port__');"
-                "if(e)e.remove();"
-                "},3000);"
-                "</script>",
-                height=0
-            )
-
-    with col_zerar:
-        if st.button("🚨 Zerar Todos os Pedidos", use_container_width=True, key="btn_zerar_forn_emb"):
-            modal_zerar_pedidos()
-            
-    # --- TABELA DE OBSERVAÇÕES GERAIS ---
-    st.write("<br>", unsafe_allow_html=True)
-    st.markdown("### 📝 Observações das Lojas")
-    if not df_obs_filtrado.empty:
-        st.dataframe(df_obs_filtrado, hide_index=True, use_container_width=True)
-    else:
-        st.info("Nenhuma observação registrada nesta semana.")
-
-# ─────────────────────────────────────────────
-# ROTA 4 — CATÁLOGO DE PRODUTOS
-# ─────────────────────────────────────────────
-elif perfil_navegacao == "Catálogo de Produtos":
-    st.markdown("""
-    <div class="page-header hide-print" style="background: linear-gradient(90deg, var(--brown-dark) 0%, #1c140d 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
-        <span style="font-size: 26px; margin-right: 12px;">🗂️</span>
-        <div style="display: inline-block; vertical-align: top;">
-            <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Catálogo de Embalagens</div>
-            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Atualize nomes direto do ERP ou crie apelidos personalizados. Os apelidos terão prioridade em todo o sistema. <br><b>Dica: Para adicionar todos os produtos rapidamente, cole-os direto na sua planilha do Google Sheets.</b></div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    df_catalogo = carregar_catalogo_embalagem()
-    df_editor_input = df_catalogo.drop(columns=["Descrição"], errors="ignore")
-
-    # 🧹 Limpando espaços invisíveis para evitar que a categoria suma da tela
-    if "Fornecedor" in df_editor_input.columns:
-        df_editor_input["Fornecedor"] = df_editor_input["Fornecedor"].astype(str).str.strip()
-
-    for loja in LOJAS:
-        if loja in df_editor_input.columns:
-            df_editor_input[loja] = df_editor_input[loja].fillna(False).astype(bool)
-
-    df_editor_input["Código"] = pd.to_numeric(df_editor_input["Código"], errors='coerce').fillna(0).astype(int)
-
-    cols_texto = ["Fornecedor", "Descrição Oficial", "Nome Personalizado"]
-    for col in cols_texto:
-        if col in df_editor_input.columns:
-            df_editor_input[col] = df_editor_input[col].fillna("").astype(str)
-
-    ordem_colunas = ["Fornecedor", "Código", "Descrição Oficial", "Nome Personalizado"] + LOJAS
-    df_editor_input = df_editor_input[ordem_colunas]
-    
-    # Busca
-    termo_busca_cat = st.text_input("🔍 Buscar Produto:", placeholder="Filtrar por código, descrição ou categoria...", key="busca_cat")
-    if termo_busca_cat:
-        mask = df_editor_input["Descrição Oficial"].str.contains(termo_busca_cat, case=False, na=False) | \
-               df_editor_input["Código"].astype(str).str.contains(termo_busca_cat, case=False, na=False) | \
-               df_editor_input["Fornecedor"].str.contains(termo_busca_cat, case=False, na=False)
-        df_editor_input = df_editor_input[mask]
-        
-    altura_dinamica_cat = min(600, max(100, int(len(df_editor_input) * 35.5) + 42))
-
-    with st.container(border=True):
-
-        # 🔥 Opções Dinâmicas: Pega o que está no banco e junta com o padrão
-        categorias_banco = df_editor_input["Fornecedor"].unique().tolist()
-        categorias_padrao = [
-            "Pet Cristal", "Embalagens Isopor", "Objeto P/ Produção",
-            "Cartaz", "Dona Rita", "Diversos", "Sacos Plásticos", "Bobinas"
-        ]
-        
-        # Remove duplicatas e espaços em branco vazios, depois organiza em ordem alfabética
-        opcoes_forn = sorted(list(set([c for c in (categorias_banco + categorias_padrao) if c.strip() != ""])))
-
-        col_cfg_cat = {
-            "Fornecedor":         st.column_config.SelectboxColumn("Categoria", options=opcoes_forn, width=200, required=True),
-            "Código":             st.column_config.NumberColumn("Cód.", width=80, format="%d", required=True),
-            "Descrição Oficial":  st.column_config.TextColumn("Nome Oficial (ERP)", width=280, disabled=False),
-            "Nome Personalizado": st.column_config.TextColumn("Nome Personalizado (Apelido)", width=230),
-        }
-        for loja in LOJAS:
-            col_cfg_cat[loja] = st.column_config.CheckboxColumn(loja, default=False)
-
-        edited_cat = st.data_editor(
-            df_editor_input,
-            use_container_width=True,
-            hide_index=True,
-            height=altura_dinamica_cat,
-            num_rows="dynamic",
-            column_config=col_cfg_cat,
-            key=f"editor_catalogo_embalagem_{st.session_state['reset_counter_embalagem']}"
-        )
+        st.markdown(f"""<div id="print-section">
+            <h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
+                Visão por Categoria (Resumo) — Embalagens
+            </h2>
+            <div class="print-container">{html_print_content}</div>
+        </div>""", unsafe_allow_html=True)
 
         st.divider()
-        col_atualizar, col_sync, _ = st.columns([2.5, 3, 3])
-
-        with col_atualizar:
-            if st.button("💾 Salvar Catálogo", type="primary", use_container_width=True):
-                df_to_save = carregar_catalogo_embalagem().drop(columns=["Descrição"], errors="ignore")
+        col_csv, col_excel, col_space, col_print, col_zerar = st.columns([1.5, 1.5, 2.0, 2.5, 2.5])
+        
+        df_obs_print = carregar_obs()
+        df_obs_filtrado = df_obs_print[df_obs_print["Observacao"].str.strip() != ""]
+        
+        df_export = pd.DataFrame()
+        for forn in nomes_forn:
+            df_f = df_all[df_all["Fornecedor"] == forn].copy()
+            if not df_f.empty:
+                df_export = pd.concat([df_export, df_f], ignore_index=True)
                 
-                # Mescla a edição baseada no código
-                for _, row in edited_cat.iterrows():
-                    mask = (df_to_save["Código"] == row["Código"]) & (df_to_save["Fornecedor"] == row["Fornecedor"])
-                    if mask.any():
-                        for c in df_to_save.columns:
-                            if c in row:
-                                df_to_save.loc[mask, c] = row[c]
-                    else:
-                        df_to_save = pd.concat([df_to_save, pd.DataFrame([row])], ignore_index=True)
-                        
-                salvar_catalogo(df_to_save)
-                st.session_state['reset_counter_embalagem'] += 1
-                st.success("✅ Catálogo atualizado com sucesso!")
-                st.rerun()
+        if not df_export.empty:
+            cols_final_export = ["Código", "Descrição", "Fornecedor"] + LOJAS
+            df_export = df_export[cols_final_export]
+            df_export = df_export.rename(columns=MAPA_LOJAS)
 
-        with col_sync:
-            if st.button("📥 Puxar Nomes do ERP", use_container_width=True):
-                try:
-                    conn_pg = st.connection("banco_erp", type="sql")
-                    cods = tuple(edited_cat["Código"].tolist())
+        with col_csv:
+            if not df_export.empty:
+                csv_str = df_export.to_csv(index=False).encode('utf-8')
+                st.download_button("⬇️ Exportar CSV", data=csv_str, file_name="visao_categoria_embalagens.csv", mime="text/csv", use_container_width=True)
 
-                    if len(cods) == 1:
-                        cods_str = f"({cods[0]})"
-                    else:
-                        cods_str = str(cods)
+        with col_excel:
+            if not df_export.empty:
+                excel_data = gerar_excel_estilizado(df_export, "Visão Categorias", df_obs=df_obs_filtrado)
+                st.download_button("⬇️ Exportar Excel", data=excel_data, file_name="visao_categoria_embalagens.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
 
-                    query_nomes = f"SELECT cadp_codigo, cadp_descricao FROM cadprod WHERE cadp_codigo IN {cods_str}"
-                    df_nomes = conn_pg.query(query_nomes, ttl=0)
+        with col_print:
+            if st.button("🖨️ Imprimir Resumo Geral", use_container_width=True):
+                components.html(
+                    "<script>"
+                    "var s=document.createElement('style');"
+                    "s.id='__forn_port__';"
+                    "s.innerHTML='@media print { @page { size: landscape; margin: 5mm; } html,body,.stApp,#root,[data-testid=\"stAppViewContainer\"],[data-testid=\"stMainBlockContainer\"],.main,.block-container { padding: 0 !important; margin: 0 !important; } }';"
+                    "window.parent.document.head.appendChild(s);"
+                    "window.parent.print();"
+                    "setTimeout(function(){var e=window.parent.document.getElementById('__forn_port__');if(e)e.remove();},3000);"
+                    "</script>", height=0
+                )
 
-                    for _, row in df_nomes.iterrows():
-                        mask = edited_cat["Código"] == row["cadp_codigo"]
-                        edited_cat.loc[mask, "Descrição Oficial"] = row["cadp_descricao"]
+        with col_zerar:
+            if st.button("🚨 Zerar Todos os Pedidos", use_container_width=True, key="btn_zerar_forn_emb"):
+                modal_zerar_pedidos()
+                
+        st.write("<br>", unsafe_allow_html=True)
+        st.markdown("### 📝 Observações das Lojas")
+        if not df_obs_filtrado.empty:
+            st.dataframe(df_obs_filtrado, hide_index=True, use_container_width=True)
+        else:
+            st.info("Nenhuma observação registrada nesta semana.")
 
+    # ─────────────────────────────────────────────
+    # ROTA 4: CATÁLOGO DE PRODUTOS
+    # ─────────────────────────────────────────────
+    elif perfil_navegacao == "Catálogo de Produtos":
+        st.markdown("""
+        <div class="page-header hide-print" style="background: linear-gradient(90deg, var(--brown-dark) 0%, #1c140d 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+            <span style="font-size: 26px; margin-right: 12px;">🗂️</span>
+            <div style="display: inline-block; vertical-align: top;">
+                <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Catálogo de Embalagens</div>
+                <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Atualize nomes direto do ERP ou crie apelidos personalizados. Os apelidos terão prioridade em todo o sistema. <br><b>Dica: Para adicionar todos os produtos rapidamente, cole-os direto na sua planilha do Google Sheets.</b></div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        df_catalogo = carregar_catalogo_embalagem()
+        df_editor_input = df_catalogo.drop(columns=["Descrição"], errors="ignore")
+
+        # --- BLINDAGEM DE TIPOS ---
+        df_editor_input["Código"] = pd.to_numeric(df_editor_input["Código"], errors='coerce').fillna(0).astype(int)
+        
+        cols_texto = ["Fornecedor", "Descrição Oficial", "Nome Personalizado"]
+        for col in cols_texto:
+            if col in df_editor_input.columns:
+                df_editor_input[col] = df_editor_input[col].fillna("").astype(str).str.strip()
+
+        for loja in LOJAS:
+            if loja in df_editor_input.columns:
+                df_editor_input[loja] = df_editor_input[loja].fillna(False).astype(bool)
+        # --------------------------
+
+        ordem_colunas = ["Fornecedor", "Código", "Descrição Oficial", "Nome Personalizado"] + LOJAS
+        df_editor_input = df_editor_input[ordem_colunas]
+        
+        termo_busca_cat = st.text_input("🔍 Buscar Produto:", placeholder="Filtrar por código, descrição ou categoria...", key="busca_cat")
+        if termo_busca_cat:
+            mask = df_editor_input["Descrição Oficial"].str.contains(termo_busca_cat, case=False, na=False) | \
+                   df_editor_input["Código"].astype(str).str.contains(termo_busca_cat, case=False, na=False) | \
+                   df_editor_input["Fornecedor"].str.contains(termo_busca_cat, case=False, na=False)
+            df_editor_input = df_editor_input[mask]
+            
+        altura_dinamica_cat = min(600, max(100, int(len(df_editor_input) * 35.5) + 42))
+
+        with st.container(border=True):
+
+            categorias_banco = df_editor_input["Fornecedor"].unique().tolist()
+            categorias_padrao = ["Pet Cristal", "Embalagens Isopor", "Objeto P/ Produção", "Cartaz", "Dona Rita", "Diversos", "Sacos Plásticos", "Bobinas"]
+            opcoes_forn = sorted(list(set([c for c in (categorias_banco + categorias_padrao) if c.strip() != ""])))
+
+            col_cfg_cat = {
+                "Fornecedor":         st.column_config.SelectboxColumn("Categoria", options=opcoes_forn, width=200, required=True),
+                "Código":             st.column_config.NumberColumn("Cód.", width=80, format="%d", required=True),
+                "Descrição Oficial":  st.column_config.TextColumn("Nome Oficial (ERP)", width=280, disabled=False),
+                "Nome Personalizado": st.column_config.TextColumn("Nome Personalizado (Apelido)", width=230),
+            }
+            for loja in LOJAS:
+                col_cfg_cat[loja] = st.column_config.CheckboxColumn(loja, default=False)
+
+            edited_cat = st.data_editor(
+                df_editor_input, use_container_width=True, hide_index=True,
+                height=altura_dinamica_cat, num_rows="dynamic", column_config=col_cfg_cat,
+                key=f"editor_catalogo_embalagem_{st.session_state['reset_counter_embalagem']}"
+            )
+
+            st.divider()
+            col_atualizar, col_sync, _ = st.columns([2.5, 3, 3])
+
+            with col_atualizar:
+                if st.button("💾 Salvar Catálogo", type="primary", use_container_width=True):
                     df_to_save = carregar_catalogo_embalagem().drop(columns=["Descrição"], errors="ignore")
+                    
                     for _, row in edited_cat.iterrows():
                         mask = (df_to_save["Código"] == row["Código"]) & (df_to_save["Fornecedor"] == row["Fornecedor"])
                         if mask.any():
-                            df_to_save.loc[mask, "Descrição Oficial"] = row["Descrição Oficial"]
+                            for c in df_to_save.columns:
+                                if c in row: df_to_save.loc[mask, c] = row[c]
+                        else:
+                            df_to_save = pd.concat([df_to_save, pd.DataFrame([row])], ignore_index=True)
                             
                     salvar_catalogo(df_to_save)
-                    st.success("✅ Nomes Oficiais sincronizados com sucesso!")
+                    st.session_state['reset_counter_embalagem'] += 1
+                    st.success("✅ Catálogo atualizado com sucesso!")
                     st.rerun()
-                except Exception as e:
-                    if "No database configured" in str(e) or "missing" in str(e).lower():
-                         st.error("⚠️ Aviso: As credenciais de acesso ao PostgreSQL não foram encontradas no painel Secrets.")
-                    else:
-                         st.error(f"⚠️ Erro ao buscar nomes no banco ERP: {e}")
+
+            with col_sync:
+                if st.button("📥 Puxar Nomes do ERP", use_container_width=True):
+                    try:
+                        conn_pg = st.connection("banco_erp", type="sql")
+                        cods = tuple(edited_cat["Código"].tolist())
+                        cods_str = f"({cods[0]})" if len(cods) == 1 else str(cods)
+
+                        query_nomes = f"SELECT cadp_codigo, cadp_descricao FROM cadprod WHERE cadp_codigo IN {cods_str}"
+                        df_nomes = conn_pg.query(query_nomes, ttl=0)
+
+                        for _, row in df_nomes.iterrows():
+                            mask = edited_cat["Código"] == row["cadp_codigo"]
+                            edited_cat.loc[mask, "Descrição Oficial"] = row["cadp_descricao"]
+
+                        df_to_save = carregar_catalogo_embalagem().drop(columns=["Descrição"], errors="ignore")
+                        for _, row in edited_cat.iterrows():
+                            mask = (df_to_save["Código"] == row["Código"]) & (df_to_save["Fornecedor"] == row["Fornecedor"])
+                            if mask.any():
+                                df_to_save.loc[mask, "Descrição Oficial"] = row["Descrição Oficial"]
+                                
+                        salvar_catalogo(df_to_save)
+                        st.success("✅ Nomes Oficiais sincronizados com sucesso!")
+                        st.rerun()
+                    except Exception as e:
+                        if "No database configured" in str(e) or "missing" in str(e).lower():
+                             st.error("⚠️ Aviso: As credenciais de acesso ao PostgreSQL não foram encontradas no painel Secrets.")
+                        else:
+                             st.error(f"⚠️ Erro ao buscar nomes no banco ERP: {e}")
