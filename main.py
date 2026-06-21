@@ -293,7 +293,7 @@ def renderizar_dashboard():
     with c2: criar_card("Padaria e Confeitaria", "Sábado", IMG_PADARIA, "🥖", "padaria_confeitaria")
     with c3: criar_card("Matéria Prima", "Até Sábado", "materiaprima.jpg", "🌾", "materia_prima")
 
-    st.write("<br><br>", unsafe_allow_html=True)
+    st.write("<br>", unsafe_allow_html=True)
     st.markdown("""
     <div style="text-align:center; padding-bottom:20px; color:#ffffff;
                 font-size:14px; font-weight:500;">
