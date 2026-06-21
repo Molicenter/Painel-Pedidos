@@ -147,8 +147,8 @@ else:
     elif st.session_state['modulo_ativo'] == 'flv_oriental':
         flv_oriental.iniciar_tela()
 
-    elif st.session_state['modulo_ativo'] == 'embalagens':
-        embalagens.iniciar_tela()
+    elif st.session_state['modulo_ativo'] == 'embalagem':
+        embalagem.iniciar_tela()
     
     elif st.session_state['modulo_ativo'] == 'acougue_especiais':
         acougue_especiais.iniciar_tela()
