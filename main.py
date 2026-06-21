@@ -27,7 +27,7 @@ import padaria_confeitaria
 import materia_prima
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. LINKS E VARIÁVEIS DE IMAGENS EXTERNAS E LOCAIS
+# 3. LINKS E VARIÁVEIS DE IMAGENS EXTERNAS
 # ─────────────────────────────────────────────────────────────────────────────
 IMG_FOLHAGEM = "https://images.unsplash.com/photo-1574316071802-0d684efa7bf5?w=400"
 IMG_FLV      = "https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=400"
@@ -35,6 +35,7 @@ IMG_ORIENTAL = "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=4
 IMG_ACOUGUE  = "https://images.unsplash.com/photo-1544025162-d76694265947?w=400"
 IMG_PADARIA  = "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400"
 
+# Função inteligente que lê tanto Links da Web quanto Imagens Locais do GitHub
 @st.cache_data
 def imagem_para_b64(caminho):
     if not caminho: return ""
@@ -49,7 +50,7 @@ def imagem_para_b64(caminho):
         return ""
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4. VARIÁVEIS DE SESSÃO GLOBAIS
+# 4. VARIÁVEIS DE SESSÃO GLOBAIS E CSS DO PAINEL
 # ─────────────────────────────────────────────────────────────────────────────
 if 'usuario_logado' not in st.session_state:
     st.session_state['usuario_logado'] = None
@@ -58,7 +59,7 @@ if 'modulo_ativo' not in st.session_state:
     st.session_state['modulo_ativo'] = 'Home'
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. CSS AVANÇADO (VISUAL ANTIGO RESTAURADO)
+# 5. CSS AVANÇADO (VISUAL COMPACTO E BOTÕES BRANCOS)
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -68,11 +69,12 @@ st.markdown("""
     color: #ffffff !important;
 }
 
-/* ── Controle de Largura Máxima e Remoção de Sobras ── */
+/* ── Controle de Largura, Espaços e Zoom (Simula 80%/67% do navegador) ── */
 .block-container {
-    padding-top: 1.5rem !important;
+    padding-top: 1rem !important;
     padding-bottom: 1rem !important;
-    max-width: 94% !important;
+    max-width: 98% !important;
+    zoom: 0.85; /* Reduz a escala de toda a página para caber sem rolar */
 }
 
 /* Ocultar Menu e Cabeçalho Nativo do Streamlit */
@@ -80,12 +82,12 @@ st.markdown("""
 header {visibility: hidden;}
 footer {visibility: hidden;}
 
-/* ── Banner Superior ── */
+/* ── Banner Superior Azul Escuro ── */
 .banner-container {
     background: linear-gradient(135deg, #07263b 0%, #0e4a74 100%);
-    padding: 12px 24px;
+    padding: 10px 24px;
     border-radius: 10px;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
     display: flex;
     align-items: center;
     gap: 14px;
@@ -93,19 +95,19 @@ footer {visibility: hidden;}
     border: 1px solid rgba(255,255,255,0.1);
 }
 .banner-logo {
-    height: 40px;
+    height: 35px;
     width: auto;
     object-fit: contain;
 }
 .banner-title {
     font-family: 'Segoe UI', Tahoma, sans-serif;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     color: #fff;
     letter-spacing: 0.5px;
 }
 
-/* ── Container do Card do Streamlit transformado no Card Antigo ── */
+/* ── Container do Card do Dashboard ── */
 div[data-testid="stVerticalBlockBorderWrapper"] {
     background: rgba(30, 30, 30, 0.6) !important;
     backdrop-filter: blur(8px) !important;
@@ -115,22 +117,20 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     transition: all 0.25s ease !important;
 }
 div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-    transform: translateY(-4px) !important;
-    box-shadow: 0 8px 24px rgba(0, 147, 233, 0.25) !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 20px rgba(0, 147, 233, 0.25) !important;
     border-color: rgba(0, 147, 233, 0.5) !important;
-    background: rgba(40, 40, 40, 0.8) !important;
 }
-/* Alinhamento interno do card */
 div[data-testid="stVerticalBlockBorderWrapper"] > div {
-    padding: 12px !important;
-    gap: 8px !important;
+    padding: 10px !important; /* Espaçamento interno mais justo */
+    gap: 6px !important;
 }
 
-/* ── Imagem do Card ── */
+/* ── Imagem do Card (Altura Reduzida) ── */
 .card-img-container {
     width: 100%;
-    height: 110px; /* Altura ideal balanceada para caber tudo */
-    border-radius: 8px;
+    height: 90px; /* Reduzido para caber mais conteúdo na tela */
+    border-radius: 6px;
     overflow: hidden;
     margin-bottom: 2px;
     background-color: #1a1a1a;
@@ -146,53 +146,52 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover .card-img-container img {
     opacity: 1.0;
 }
 
-/* ── Botões Brancos de Título ── */
-.main div[data-testid="stButton"] button[kind="secondary"] {
+/* ── Botões Brancos de Título (Forçando a cor nas letras) ── */
+div[data-testid="stVerticalBlockBorderWrapper"] button {
     background-color: #ffffff !important;
-    color: #0B3C5D !important;
-    font-weight: 800 !important;
-    font-size: 15px !important;
-    padding: 6px 12px !important;
-    border-radius: 6px !important;
     border: none !important;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+    border-radius: 6px !important;
+    width: 100% !important;
+    min-height: 35px !important;
+    padding: 4px 10px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
     transition: all 0.2s ease !important;
-    min-height: 38px !important;
 }
-.main div[data-testid="stButton"] button[kind="secondary"]:hover {
-    background-color: #e0f2ff !important;
-    color: #07263b !important;
-    transform: scale(1.01) !important;
-}
-.main div[data-testid="stButton"] button[kind="secondary"] p {
+div[data-testid="stVerticalBlockBorderWrapper"] button p {
+    color: #000000 !important; /* Força o texto do botão a ser preto */
+    font-weight: 800 !important;
     font-size: 14px !important;
     margin: 0 !important;
+}
+div[data-testid="stVerticalBlockBorderWrapper"] button:hover {
+    background-color: #e6e6e6 !important;
+    transform: translateY(-1px);
 }
 
 /* ── Formatação de Texto de Horários ── */
 .texto-horario {
-    font-size: 12.5px;
-    color: #ffffff;
-    line-height: 1.4;
+    font-size: 11px;
+    color: #a1a1aa;
+    line-height: 1.3;
     font-weight: 500;
-    min-height: 36px;
+    min-height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
 /* ── Títulos das Linhas (Setores) ── */
 .linha-titulo-sec {
-    font-size: 14px;
+    font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #0093E9;
-    margin-bottom: 10px;
-    margin-top: 25px;
+    color: #5cb3e6;
+    margin-bottom: 8px;
+    margin-top: 15px;
     font-weight: 700;
-    border-left: 3px solid #0093E9;
+    border-left: 3px solid #1f8bbf;
     padding-left: 8px;
 }
 </style>
@@ -234,13 +233,12 @@ if st.session_state['usuario_logado'] is None:
     st.stop()
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 7. FUNÇÕES PARA GERAR A VITRINE DE CARDS (DASHBOARD ANTIGO RESTAURADO)
+# 7. FUNÇÕES PARA GERAR A VITRINE DE CARDS (DASHBOARD)
 # ─────────────────────────────────────────────────────────────────────────────
 def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
     img_src = imagem_para_b64(caminho_imagem)
     
     with st.container(border=True):
-        # 1. Imagem na proporção exata
         if img_src:
             st.markdown(f"""
             <div class="card-img-container">
@@ -250,22 +248,21 @@ def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
         else:
             st.markdown(f"""
             <div class="card-img-container" style="display:flex; justify-content:center; align-items:center;">
-                <span style="font-size: 40px;">{emoji_fallback}</span>
+                <span style="font-size: 35px;">{emoji_fallback}</span>
             </div>
             """, unsafe_allow_html=True)
         
-        # 2. O botão de ação que navega (Estilizado como o texto branco via CSS global)
+        # Botão branco com texto preto forçado pelo CSS
         if st.button(titulo, key=f"btn_{chave_modulo}", use_container_width=True):
             st.session_state['modulo_ativo'] = chave_modulo
             st.rerun()
             
-        # 3. O texto do rodapé (Dias e Horários)
         st.markdown(f'<div class="texto-horario">{subtitulo}</div>', unsafe_allow_html=True)
 
 def renderizar_dashboard():
     # Banner Principal
     logo_src = imagem_para_b64("passaro_logo.png")
-    img_tag = f'<img src="{logo_src}" class="banner-logo" alt="Logo">' if logo_src else '<span style="font-size:28px">🛒</span>'
+    img_tag = f'<img src="{logo_src}" class="banner-logo" alt="Logo">' if logo_src else '<span style="font-size:24px">🛒</span>'
     
     st.markdown(f"""
     <div class="banner-container">
@@ -275,7 +272,7 @@ def renderizar_dashboard():
     """, unsafe_allow_html=True)
 
     # --- LINHA 1 ---
-    st.markdown('<div class="linha-titulo-sec">🥦 Setor Hortifruti (FLV)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="linha-titulo-sec">🥬 Setor Hortifruti (FLV)</div>', unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4, gap="medium")
     with c1: criar_card("Folhagem", "Seg a Sáb até 12:00hrs", IMG_FOLHAGEM, "🥬", "flv_folhagem")
     with c2: criar_card("FLV Normal", "Terças-feira até 17:00hrs<br>Quintas-feira até 14:00hrs", IMG_FLV, "🍎", "flv_normal")
@@ -287,7 +284,7 @@ def renderizar_dashboard():
     c1, c2, c3, _ = st.columns(4, gap="medium")
     with c1: criar_card("Pioneiro + BF + Paraná", "Seg a Sex até 11:00hrs", "Pioneiros.jpg", "🍗", "acougue_especiais")
     with c2: criar_card("Açougue Adriano", "Quartas-feira até 15:00hrs<br>Sábado até 15:00hrs", IMG_ACOUGUE, "🔪", "acougue_total")
-    with c3: criar_card("Peças Açougue - Manoel", "Seg/Qua/Sex - Arap. 15:00h<br>Ter/Qui/Sáb - Maringá 15:00h", IMG_ACOUGUE, "🥩", "acougue_pecas")
+    with c3: criar_card("Peças Açougue - Manoel", "Seg/Qua/Sex - Arap. 15:00h<br>Ter/Qui/Sáb - Maringá 15:00h", "img_manoel.jpg", "🥩", "acougue_pecas")
 
     # --- LINHA 3 ---
     st.markdown('<div class="linha-titulo-sec">📦 Outros Setores e Logística</div>', unsafe_allow_html=True)
@@ -295,9 +292,6 @@ def renderizar_dashboard():
     with c1: criar_card("Embalagens", "Sexta-feira até as 17:30hrs", "Embalagens.jpg", "🥡", "embalagem")
     with c2: criar_card("Padaria e Confeitaria", "Sábado", IMG_PADARIA, "🥖", "padaria_confeitaria")
     with c3: criar_card("Matéria Prima", "Até Sábado", "materiaprima.jpg", "🌾", "materia_prima")
-
-    # Rodapé Invisível para dar um suspiro na página
-    st.write("<br><br>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 8. ROTEADOR DE TELAS
@@ -347,12 +341,3 @@ else:
 
     elif st.session_state['modulo_ativo'] == 'acougue_pecas':
         acougue_pecas.iniciar_tela()
-
-# ─────────────────────────────────────────────
-# RODAPÉ
-# ─────────────────────────────────────────────
-st.markdown("""
-<div style="text-align:center; margin-top:30px; color:#ffffff; font-size:14px; font-weight: 500;">
-    Molicenter Supermercados © 2026 — Painel Web de Pedidos Centralizados
-</div>
-""", unsafe_allow_html=True)
