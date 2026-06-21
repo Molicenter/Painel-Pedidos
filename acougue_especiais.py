@@ -768,7 +768,20 @@ def iniciar_tela():
 
         df_catalogo = carregar_catalogo_acougue()
         df_editor_input = df_catalogo.drop(columns=["Descrição"], errors="ignore")
+        
+        # 1. Garante que o código seja número
         df_editor_input["Código"] = pd.to_numeric(df_editor_input["Código"], errors='coerce').fillna(0).astype(int)
+
+        # 2. Garante que colunas de texto não tenham nulos (Evita o erro de tipo)
+        cols_texto = ["Fornecedor", "Descrição Oficial", "Nome Personalizado"]
+        for col in cols_texto:
+            if col in df_editor_input.columns:
+                df_editor_input[col] = df_editor_input[col].fillna("").astype(str)
+
+        # 3. Garante que as colunas das lojas sejam estritamente Booleanas (Checkbox)
+        for loja in LOJAS:
+            if loja in df_editor_input.columns:
+                df_editor_input[loja] = df_editor_input[loja].fillna(False).astype(bool)
 
         ordem_colunas = ["Fornecedor", "Código", "Descrição Oficial", "Nome Personalizado"] + LOJAS
         df_editor_input = df_editor_input[ordem_colunas]
