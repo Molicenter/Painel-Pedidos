@@ -58,19 +58,33 @@ if 'usuario_logado' not in st.session_state:
 if 'modulo_ativo' not in st.session_state:
     st.session_state['modulo_ativo'] = 'Home'
 
-# Estilo específico para deixar os botões do Dashboard Brancos como na foto antiga
+# Estilo para forçar o botão a ser um bloco branco (estilo antigo)
+# Usamos [kind="secondary"] para afetar os cards sem estragar o botão verde do Login!
 st.markdown("""
 <style>
 .main div[data-testid="stButton"] button[kind="secondary"] {
     background-color: #ffffff !important;
     color: #000000 !important;
     border: none !important;
-    font-weight: 700 !important;
     border-radius: 6px !important;
+    font-weight: 700 !important;
+    width: 100% !important;
+    padding: 0.35rem !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
     transition: all 0.2s;
 }
 .main div[data-testid="stButton"] button[kind="secondary"]:hover {
     background-color: #e0e0e0 !important;
+    transform: translateY(-1px);
+}
+.main div[data-testid="stButton"] button[kind="secondary"] p {
+    font-size: 13px !important;
+    margin: 0 !important;
+}
+
+/* Ajusta o espaçamento interno dos containers para ficarem mais compactos */
+[data-testid="stVerticalBlockBorderWrapper"] > div {
+    padding: 1rem !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -115,8 +129,8 @@ if st.session_state['usuario_logado'] is None:
 # ─────────────────────────────────────────────────────────────────────────────
 def titulo_secao(icone, texto):
     st.markdown(f"""
-    <div style="border-left: 4px solid #1375b7; padding-left: 10px; margin-bottom: 15px; margin-top: 25px;">
-        <h4 style="margin: 0; color: #6db6e3; font-size: 14px; font-weight: 700; text-transform: uppercase;">{icone} {texto}</h4>
+    <div style="border-left: 3px solid #1f8bbf; padding-left: 10px; margin-bottom: 10px; margin-top: 20px;">
+        <h4 style="margin: 0; color: #5cb3e6; font-size: 13px; font-weight: 700; text-transform: uppercase;">{icone} {texto}</h4>
     </div>
     """, unsafe_allow_html=True)
 
@@ -124,32 +138,37 @@ def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
     img_src = imagem_para_b64(caminho_imagem)
     
     with st.container(border=True):
-        # A imagem fica travada em 110px de altura. Nada vai esticar a tela!
+        # MÁGICA AQUI: object-fit: cover faz a imagem cortar as sobras e preencher o quadro como um banner
         if img_src:
             st.markdown(f"""
-            <div style="display: flex; justify-content: center; align-items: center; height: 110px; margin-bottom: 12px;">
-                <img src="{img_src}" style="max-height: 100%; max-width: 100%; object-fit: contain; border-radius: 6px;">
+            <div style="height: 90px; width: 100%; margin-bottom: 12px; overflow: hidden; border-radius: 4px; background-color: #ffffff;">
+                <img src="{img_src}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
             </div>
             """, unsafe_allow_html=True)
         else:
-            st.markdown(f"<h1 style='text-align:center; font-size: 55px; margin: 10px 0; height: 95px;'>{emoji_fallback}</h1>", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div style="height: 90px; width: 100%; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; background-color: #21262d; border-radius: 4px;">
+                <span style="font-size: 40px;">{emoji_fallback}</span>
+            </div>
+            """, unsafe_allow_html=True)
         
-        # O botão do Streamlit que age como título da categoria
+        # O botão branco
         if st.button(titulo, key=f"btn_{chave_modulo}", use_container_width=True):
             st.session_state['modulo_ativo'] = chave_modulo
             st.rerun()
             
-        st.markdown(f"<p style='text-align:center; color:#7d8590; font-size:11px; margin-top:4px; margin-bottom:0px;'>{subtitulo}</p>", unsafe_allow_html=True)
+        # O subtítulo pequeno e centralizado
+        st.markdown(f"<p style='text-align:center; color:#a1a1aa; font-size:10px; margin-top:6px; margin-bottom:0px; line-height:1.3;'>{subtitulo}</p>", unsafe_allow_html=True)
 
 def renderizar_dashboard():
-    # Cabeçalho Azul com a Logo
+    # Cabeçalho Azul com as bordas arredondadas e logotipo
     logo_src = imagem_para_b64("passaro_logo.png")
-    img_tag = f'<img src="{logo_src}" width="40" style="margin-right: 15px;">' if logo_src else '📦 '
+    img_tag = f'<img src="{logo_src}" width="35" style="margin-right: 15px;">' if logo_src else '<span style="font-size: 24px; margin-right: 10px;">🦆</span>'
     
     st.markdown(f"""
-    <div style="background: linear-gradient(90deg, #092c42 0%, #041421 100%); padding: 15px 25px; border-radius: 10px; border: 1px solid #134f75; display: flex; align-items: center; margin-bottom: 20px;">
+    <div style="background-color: #0c436b; padding: 12px 20px; border-radius: 8px; display: flex; align-items: center; margin-bottom: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
         {img_tag}
-        <h2 style="margin: 0; color: #e6edf3; font-size: 22px; font-weight: 700;">Gestão Pedidos - Molicenter</h2>
+        <h2 style="margin: 0; color: #ffffff; font-size: 18px; font-weight: 700;">Gestão Pedidos - Molicenter</h2>
     </div>
     """, unsafe_allow_html=True)
 
@@ -157,16 +176,16 @@ def renderizar_dashboard():
     titulo_secao("🥬", "SETOR HORTIFRUTI (FLV)")
     c1, c2, c3, c4 = st.columns(4)
     with c1: criar_card("Folhagem", "Seg a Sáb até 12:00hrs", IMG_FOLHAGEM, "🥬", "flv_folhagem")
-    with c2: criar_card("FLV Normal", "Terças e Quintas", IMG_FLV, "🍎", "flv_normal")
-    with c3: criar_card("FLV Ofertas", "Quintas-feiras", IMG_FLV, "🏷️", "flv_ofertas")
-    with c4: criar_card("FLV Oriental", "Quintas-feiras", IMG_ORIENTAL, "🍣", "flv_oriental")
+    with c2: criar_card("FLV Normal", "Terças-feira até 17:00hrs<br>Quintas-feira até 14:00hrs", IMG_FLV, "🍎", "flv_normal")
+    with c3: criar_card("FLV Ofertas", "Quintas-feiras até 14:00hrs", IMG_FLV, "🏷️", "flv_ofertas")
+    with c4: criar_card("FLV Oriental", "Quintas-feiras até 14:00hrs", IMG_ORIENTAL, "🍣", "flv_oriental")
 
     # --- LINHA 2 ---
     titulo_secao("🥩", "SETOR AÇOUGUE E AVES")
     c1, c2, c3, _ = st.columns(4)
     with c1: criar_card("Pioneiro + BF + Paraná", "Seg a Sex até 11:00hrs", "Pioneiros.jpg", "🍗", "acougue_especiais")
-    with c2: criar_card("Açougue Adriano", "Qua e Sáb até 15:00hrs", IMG_ACOUGUE, "🔪", "acougue_total")
-    with c3: criar_card("Peças Açougue - Manoel", "Ter, Qui e Sáb", "img_manoel.jpg", "🥩", "acougue_pecas")
+    with c2: criar_card("Açougue Adriano", "Quartas-feira até 15:00hrs<br>Sábado até 15:00hrs", IMG_ACOUGUE, "🔪", "acougue_total")
+    with c3: criar_card("Peças Açougue - Manoel", "Seg / Qua / Sex — Arapongas até 15:00h<br>Ter / Qui / Sáb — Maringá até 15:00h", "img_manoel.jpg", "🥩", "acougue_pecas")
 
     # --- LINHA 3 ---
     titulo_secao("📦", "OUTROS SETORES E LOGÍSTICA")
