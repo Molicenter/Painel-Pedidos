@@ -240,36 +240,42 @@ def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
     img_src = imagem_para_b64(caminho_imagem)
     
     with st.container(border=True):
+        # Imagem sempre largura total
         if img_src:
             st.markdown(f"""
-            <div class="card-img-container">
-                <img src="{img_src}">
+            <div style="width:100%; height:115px; border-radius:4px; overflow:hidden; 
+                        margin-bottom:6px; background:#0e1117;">
+                <img src="{img_src}" style="width:100%; height:100%; 
+                           object-fit:cover; display:block;">
             </div>
             """, unsafe_allow_html=True)
         else:
             st.markdown(f"""
-            <div class="card-img-container" style="display:flex; justify-content:center; align-items:center;">
-                <span style="font-size: 40px;">{emoji_fallback}</span>
+            <div style="width:100%; height:115px; border-radius:4px; overflow:hidden;
+                        margin-bottom:6px; background:#0e1117; display:flex; 
+                        align-items:center; justify-content:center;">
+                <span style="font-size:40px;">{emoji_fallback}</span>
             </div>
             """, unsafe_allow_html=True)
         
-        # Botão branco com texto preto
-        if st.button(titulo, key=f"btn_{chave_modulo}", use_container_width=True):
+        # Botão nativo com key única
+        btn = st.button(
+            titulo, 
+            key=f"btn_{chave_modulo}", 
+            use_container_width=True
+        )
+        if btn:
             st.session_state['modulo_ativo'] = chave_modulo
             st.rerun()
             
-        st.markdown(f'<div class="texto-horario">{subtitulo}</div>', unsafe_allow_html=True)
-
-def renderizar_dashboard():
-    logo_src = imagem_para_b64("passaro_logo.png")
-    img_tag = f'<img src="{logo_src}" class="banner-logo" alt="Logo">' if logo_src else '<span style="font-size:28px">🦆</span>'
-    
-    st.markdown(f"""
-    <div class="banner-container">
-        {img_tag}
-        <div class="banner-title">Gestão Pedidos - Molicenter</div>
-    </div>
-    """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <div style="font-size:11px; color:#c9d1d9; line-height:1.5; font-weight:500;
+                    min-height:32px; display:flex; align-items:center; 
+                    justify-content:center; text-align:center; 
+                    margin-top:6px; padding:0 4px;">
+            {subtitulo}
+        </div>
+        """, unsafe_allow_html=True)
 
     # --- LINHA 1 ---
     st.markdown('<div class="linha-titulo-sec">🥬 Setor Hortifruti (FLV)</div>', unsafe_allow_html=True)
