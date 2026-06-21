@@ -11,11 +11,9 @@ st.set_page_config(
 )
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 2. IMPORTAÇÃO DOS MÓDULOS (Ajustados com underline _)
+# 2. IMPORTAÇÃO DOS MÓDULOS
 # ─────────────────────────────────────────────────────────────────────────────
 import flv_folhagem
-
-# Descomente as linhas abaixo conforme for ajustando os outros ficheiros:
 import flv_normal
 import flv_ofertas
 import flv_oriental
@@ -27,7 +25,16 @@ import padaria_confeitaria
 import materia_prima
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. VARIÁVEIS DE SESSÃO GLOBAIS
+# 3. LINKS DAS IMAGENS EXTERNAS (LINKS DE FALLBACK)
+# ─────────────────────────────────────────────────────────────────────────────
+IMG_FOLHAGEM = "https://images.unsplash.com/photo-1574316071802-0d684efa7bf5?w=400"
+IMG_FLV      = "https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=400"
+IMG_ORIENTAL = "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400"
+IMG_ACOUGUE  = "https://images.unsplash.com/photo-1544025162-d76694265947?w=400"
+IMG_PADARIA  = "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 4. VARIÁVEIS DE SESSÃO GLOBAIS
 # ─────────────────────────────────────────────────────────────────────────────
 if 'usuario_logado' not in st.session_state:
     st.session_state['usuario_logado'] = None
@@ -36,7 +43,7 @@ if 'modulo_ativo' not in st.session_state:
     st.session_state['modulo_ativo'] = 'Home'
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 4. TELA DE LOGIN ÚNICA DO PORTAL
+# 5. TELA DE LOGIN ÚNICA DO PORTAL
 # ─────────────────────────────────────────────────────────────────────────────
 if st.session_state['usuario_logado'] is None:
     st.write("<br><br>", unsafe_allow_html=True)
@@ -71,7 +78,7 @@ if st.session_state['usuario_logado'] is None:
     st.stop()
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. FUNÇÃO PARA GERAR A VITRINE DE CARDS (DASHBOARD)
+# 6. FUNÇÃO PARA GERAR A VITRINE DE CARDS (DASHBOARD)
 # ─────────────────────────────────────────────────────────────────────────────
 def criar_card(titulo, subtitulo, nome_imagem, emoji_fallback, chave_modulo):
     with st.container(border=True):
@@ -93,19 +100,19 @@ def renderizar_dashboard():
 
     st.markdown("#### 🥬 SETOR HORTIFRUTI (FLV)")
     c1, c2, c3, c4 = st.columns(4)
-    with c1: criar_card("Folhagem", "Seg a Sáb até 12:00hrs", "img_folhagem.jpg", "🥬", "flv_folhagem")
-    with c2: criar_card("FLV Normal", "Terças e Quintas", "img_flv_normal.jpg", "🍎", "flv_normal")
-    with c3: criar_card("FLV Ofertas", "Quintas-feiras", "img_flv_ofertas.jpg", "🏷️", "flv_ofertas")
-    with c4: criar_card("FLV Oriental", "Quintas-feiras", "img_flv_oriental.jpg", "🍣", "flv_oriental")
+    # Variáveis passadas diretamente sem aspas para carregar os links da internet
+    with c1: criar_card("Folhagem", "Seg a Sáb até 12:00hrs", IMG_FOLHAGEM, "🥬", "flv_folhagem")
+    with c2: criar_card("FLV Normal", "Terças e Quintas", IMG_FLV, "🍎", "flv_normal")
+    with c3: criar_card("FLV Ofertas", "Quintas-feiras", IMG_FLV, "🏷️", "flv_ofertas")
+    with c4: criar_card("FLV Oriental", "Quintas-feiras", IMG_ORIENTAL, "🍣", "flv_oriental")
 
     st.write("<br>", unsafe_allow_html=True)
     
     st.markdown("#### 🥩 SETOR AÇOUGUE E AVES")
     c1, c2, c3, _ = st.columns(4)
-    # Trocámos a chave do Pioneiro para "acougue_especiais"
+    # Arquivos locais mantêm as aspas se estiverem na raiz do seu GitHub
     with c1: criar_card("Pioneiro + BF + Paraná", "Seg a Sex até 11:00hrs", "Pioneiros.jpg", "🍗", "acougue_especiais")
-    # Colocámos a chave "acougue_total" no Adriano (ajuste depois se for o contrário)
-    with c2: criar_card("Açougue Adriano", "Qua e Sáb até 15:00hrs", "img_adriano.jpg", "🔪", "acougue_total")
+    with c2: criar_card("Açougue Adriano", "Qua e Sáb até 15:00hrs", IMG_ACOUGUE, "🔪", "acougue_total")
     with c3: criar_card("Peças Açougue - Manoel", "Ter, Qui e Sáb", "img_manoel.jpg", "🥩", "acougue_pecas")
 
     st.write("<br>", unsafe_allow_html=True)
@@ -113,11 +120,11 @@ def renderizar_dashboard():
     st.markdown("#### 📦 OUTROS SETORES E LOGÍSTICA")
     c1, c2, c3, _ = st.columns(4)
     with c1: criar_card("Embalagens", "Sexta-feira até 17:30hrs", "Embalagens.jpg", "🥡", "embalagem")
-    with c2: criar_card("Padaria e Confeitaria", "Sábado", "img_padaria.jpg", "🥖", "padaria_confeitaria")
+    with c2: criar_card("Padaria e Confeitaria", "Sábado", IMG_PADARIA, "🥖", "padaria_confeitaria")
     with c3: criar_card("Matéria Prima", "Até Sábado", "materiaprima.jpg", "🌾", "materia_prima")
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 6. ROTEADOR DE TELAS
+# 7. ROTEADOR DE TELAS
 # ─────────────────────────────────────────────────────────────────────────────
 if st.session_state['modulo_ativo'] == 'Home':
     renderizar_dashboard()
@@ -164,6 +171,3 @@ else:
 
     elif st.session_state['modulo_ativo'] == 'acougue_pecas':
         acougue_pecas.iniciar_tela()
-        
-    elif st.session_state['modulo_ativo'] == 'flv_normal':
-        st.info("🍎 Módulo FLV Normal em construção...")
