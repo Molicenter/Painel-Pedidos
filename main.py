@@ -18,7 +18,7 @@ import flv_folhagem
 # Descomente as linhas abaixo conforme for ajustando os outros ficheiros:
 import flv_normal
 import flv_ofertas
-#import flv_oriental
+import flv_oriental
 import acougue_total
 import acougue_especiais
 import acougue_pecas
@@ -143,6 +143,9 @@ else:
 
     elif st.session_state['modulo_ativo'] == 'flv_ofertas':
         flv_ofertas.iniciar_tela()
+
+     elif st.session_state['modulo_ativo'] == 'flv_oriental':
+        flv_oriental.iniciar_tela()
     
     elif st.session_state['modulo_ativo'] == 'acougue_especiais':
         acougue_especiais.iniciar_tela()
