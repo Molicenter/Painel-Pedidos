@@ -60,133 +60,132 @@ if 'modulo_ativo' not in st.session_state:
 # ─────────────────────────────────────────────────────────────────────────────
 # 5. CSS AVANÇADO (VISUAL EXATO DA FOTO 1)
 # ─────────────────────────────────────────────────────────────────────────────
-st.markdown("""
-<style>
-/* ── Base do Tema ── */
-.stApp, .main {
-    background-color: #0e1117 !important; /* Fundo padrão escuro */
-}
+zoom_value = "0.78" if st.session_state.get('usuario_logado') else "1.0"
 
-/* ── Controle de Largura e Zoom (Cravado para mostrar tudo sem rolar) ── */
-.block-container {
+st.markdown(f"""
+<style>
+.stApp, .main {{
+    background-color: #0e1117 !important;
+}}
+
+.block-container {{
     padding-top: 1.5rem !important;
     padding-bottom: 1rem !important;
     max-width: 95% !important;
-    zoom: 0.90 !important; /* Ajuste fino: compacto para os cards, mas legível no login */
-}
+    zoom: {zoom_value} !important;
+}}
 
-/* Ocultar Menu e Cabeçalho Nativo do Streamlit */
-#MainMenu {visibility: hidden;}
-header {visibility: hidden;}
-footer {visibility: hidden;}
+#MainMenu {{visibility: hidden;}}
+header {{visibility: hidden;}}
+footer {{visibility: hidden;}}
 
-/* ── Banner Superior Azul Escuro ── */
-.banner-container {
+/* ── Banner ── */
+.banner-container {{
     background: linear-gradient(135deg, #07263b 0%, #0e4a74 100%);
     padding: 12px 24px;
     border-radius: 8px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     gap: 14px;
     border: 1px solid rgba(255,255,255,0.1);
-}
-.banner-logo {
-    height: 40px;
-    width: auto;
-    object-fit: contain;
-}
-.banner-title {
+}}
+.banner-logo {{ height: 40px; width: auto; object-fit: contain; }}
+.banner-title {{
     font-family: 'Segoe UI', Tahoma, sans-serif;
-    font-size: 22px;
-    font-weight: 800;
-    color: #fff;
-}
+    font-size: 22px; font-weight: 800; color: #fff;
+}}
 
-/* ── Container dos Cards (Fundo acinzentado escuro) ── */
-div[data-testid="stVerticalBlockBorderWrapper"] {
-    background-color: #1a1c24 !important; /* Cinza escuro elegante */
+/* ── Cards: fundo acinzentado escuro ── */
+div[data-testid="stVerticalBlockBorderWrapper"] {{
+    background-color: #1a1c24 !important;
     border-radius: 8px !important;
     border: 1px solid #30363d !important;
     transition: all 0.25s ease !important;
-}
-div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+    overflow: hidden !important;
+}}
+div[data-testid="stVerticalBlockBorderWrapper"]:hover {{
     border-color: #5cb3e6 !important;
     background-color: #1f222b !important;
-}
-div[data-testid="stVerticalBlockBorderWrapper"] > div {
-    padding: 12px !important;
-    gap: 6px !important;
-}
+}}
+div[data-testid="stVerticalBlockBorderWrapper"] > div {{
+    padding: 10px !important;
+    gap: 4px !important;
+}}
 
-/* ── Imagem do Card ── */
-.card-img-container {
+/* ── Imagem do Card: preenche toda a largura ── */
+.card-img-container {{
     width: 100%;
-    height: 120px; 
+    height: 115px;
     border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     background-color: #0e1117;
-}
-.card-img-container img {
+    display: block;
+}}
+.card-img-container img {{
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
     opacity: 0.95;
     transition: opacity 0.3s;
-}
-div[data-testid="stVerticalBlockBorderWrapper"]:hover .card-img-container img {
+}}
+div[data-testid="stVerticalBlockBorderWrapper"]:hover .card-img-container img {{
     opacity: 1.0;
-}
+}}
 
-/* ── Botões Brancos de Título (FORÇANDO BRANCO E PRETO) ── */
-/* Usamos :not([kind="primary"]) para não estragar o botão azul do Login */
-div[data-testid="stVerticalBlockBorderWrapper"] button:not([kind="primary"]) {
+/* ── Botão: fundo BRANCO, texto PRETO, bold ── */
+div[data-testid="stVerticalBlockBorderWrapper"] button {{
     background-color: #ffffff !important;
     background: #ffffff !important;
-    border: none !important;
+    border: 1px solid #cccccc !important;
     border-radius: 4px !important;
     width: 100% !important;
-    min-height: 38px !important;
-    padding: 6px 12px !important;
-    margin-top: 5px !important;
-}
-div[data-testid="stVerticalBlockBorderWrapper"] button:not([kind="primary"]) * {
-    color: #000000 !important; /* TEXTO PRETO */
-    font-weight: 800 !important;
-    font-size: 14px !important;
-}
-div[data-testid="stVerticalBlockBorderWrapper"] button:not([kind="primary"]):hover {
-    background-color: #e6e6e6 !important;
-    background: #e6e6e6 !important;
-}
+    min-height: 36px !important;
+    padding: 5px 10px !important;
+    margin-top: 2px !important;
+}}
+div[data-testid="stVerticalBlockBorderWrapper"] button p,
+div[data-testid="stVerticalBlockBorderWrapper"] button span,
+div[data-testid="stVerticalBlockBorderWrapper"] button * {{
+    color: #000000 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    text-decoration: none !important;
+}}
+div[data-testid="stVerticalBlockBorderWrapper"] button:hover {{
+    background-color: #e8e8e8 !important;
+    background: #e8e8e8 !important;
+}}
 
-/* ── Formatação de Texto de Horários ── */
-.texto-horario {
-    font-size: 12px;
-    color: #e6edf3;
-    line-height: 1.4;
+/* ── Texto de horário: centralizado ── */
+.texto-horario {{
+    font-size: 11px;
+    color: #c9d1d9;
+    line-height: 1.5;
     font-weight: 500;
-    min-height: 36px;
+    min-height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    margin-top: 8px;
-}
+    margin-top: 6px;
+    padding: 0 4px;
+}}
 
-/* ── Títulos das Linhas (Setores) ── */
-.linha-titulo-sec {
-    font-size: 13px;
+/* ── Títulos de setor ── */
+.linha-titulo-sec {{
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #5cb3e6;
-    margin-bottom: 8px;
-    margin-top: 15px;
+    margin-bottom: 6px;
+    margin-top: 12px;
     font-weight: 700;
     border-left: 3px solid #1f8bbf;
     padding-left: 8px;
-}
+}}
 </style>
 """, unsafe_allow_html=True)
 
