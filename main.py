@@ -16,15 +16,15 @@ st.set_page_config(
 import flv_folhagem
 
 # Descomente as linhas abaixo conforme for ajustando os outros ficheiros:
-import flv_normal
-import flv_ofertas
-import flv_oriental
-import acougue_total
+#import flv_normal
+#import flv_ofertas
+#import flv_oriental
+#import acougue_total
 import acougue_especiais
-import acougue_pecas
-import embalagem
-import padaria_confeitaria
-import materia_prima
+#import acougue_pecas
+#import embalagem
+#import padaria_confeitaria
+#import materia_prima
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. VARIÁVEIS DE SESSÃO GLOBAIS
