@@ -19,7 +19,7 @@ import flv_folhagem
 #import flv_normal
 #import flv_ofertas
 #import flv_oriental
-#import acougue_total
+import acougue_total
 import acougue_especiais
 #import acougue_pecas
 #import embalagem
@@ -139,6 +139,9 @@ else:
         flv_folhagem.iniciar_tela()
         
     elif st.session_state['modulo_ativo'] == 'acougue_especiais':
+        acougue_especiais.iniciar_tela()
+
+    elif st.session_state['modulo_ativo'] == 'acougue_total':
         acougue_especiais.iniciar_tela()
         
     elif st.session_state['modulo_ativo'] == 'flv_normal':
