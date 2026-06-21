@@ -27,7 +27,7 @@ import padaria_confeitaria
 import materia_prima
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 3. LINKS E VARIÁVEIS DE IMAGENS EXTERNAS E LOCAIS
+# 3. LINKS E VARIÁVEIS DE IMAGENS EXTERNAS
 # ─────────────────────────────────────────────────────────────────────────────
 IMG_FOLHAGEM = "https://images.unsplash.com/photo-1574316071802-0d684efa7bf5?w=400"
 IMG_FLV      = "https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=400"
@@ -58,22 +58,21 @@ if 'modulo_ativo' not in st.session_state:
     st.session_state['modulo_ativo'] = 'Home'
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. CSS AVANÇADO (VISUAL ANTIGO RESTAURADO COM PERFEIÇÃO)
+# 5. CSS AVANÇADO (VISUAL EXATO DA FOTO 1)
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 /* ── Base do Tema ── */
 .stApp, .main {
-    background-color: #0a0a0a !important;
-    color: #ffffff !important;
+    background-color: #0e1117 !important; /* Fundo padrão escuro */
 }
 
-/* ── Controle de Largura, Espaços e Zoom cravado em 67% ── */
+/* ── Controle de Largura e Zoom (Cravado para mostrar tudo sem rolar) ── */
 .block-container {
     padding-top: 1.5rem !important;
     padding-bottom: 1rem !important;
     max-width: 95% !important;
-    zoom: 0.67 !important; /* Escala exata solicitada */
+    zoom: 0.70 !important; /* Ajuste fino: compacto para os cards, mas legível no login */
 }
 
 /* Ocultar Menu e Cabeçalho Nativo do Streamlit */
@@ -85,12 +84,11 @@ footer {visibility: hidden;}
 .banner-container {
     background: linear-gradient(135deg, #07263b 0%, #0e4a74 100%);
     padding: 12px 24px;
-    border-radius: 10px;
+    border-radius: 8px;
     margin-bottom: 25px;
     display: flex;
     align-items: center;
     gap: 14px;
-    box-shadow: 0 4px 15px rgba(0, 147, 233, 0.15);
     border: 1px solid rgba(255,255,255,0.1);
 }
 .banner-logo {
@@ -103,78 +101,70 @@ footer {visibility: hidden;}
     font-size: 22px;
     font-weight: 800;
     color: #fff;
-    letter-spacing: 0.5px;
 }
 
-/* ── Container do Card do Dashboard ── */
+/* ── Container dos Cards (Fundo acinzentado escuro) ── */
 div[data-testid="stVerticalBlockBorderWrapper"] {
-    background: rgba(30, 30, 30, 0.6) !important;
-    backdrop-filter: blur(8px) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4) !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
+    background-color: #1a1c24 !important; /* Cinza escuro elegante */
+    border-radius: 8px !important;
+    border: 1px solid #30363d !important;
     transition: all 0.25s ease !important;
 }
 div[data-testid="stVerticalBlockBorderWrapper"]:hover {
-    transform: translateY(-4px) !important;
-    box-shadow: 0 8px 24px rgba(0, 147, 233, 0.25) !important;
-    border-color: rgba(0, 147, 233, 0.5) !important;
-    background: rgba(40, 40, 40, 0.8) !important;
+    border-color: #5cb3e6 !important;
+    background-color: #1f222b !important;
 }
 div[data-testid="stVerticalBlockBorderWrapper"] > div {
     padding: 12px !important;
-    gap: 8px !important;
+    gap: 6px !important;
 }
 
 /* ── Imagem do Card ── */
 .card-img-container {
     width: 100%;
-    height: 110px; 
-    border-radius: 8px;
+    height: 120px; 
+    border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 4px;
-    background-color: #1a1a1a;
+    margin-bottom: 8px;
+    background-color: #0e1117;
 }
 .card-img-container img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.9;
+    opacity: 0.95;
     transition: opacity 0.3s;
 }
 div[data-testid="stVerticalBlockBorderWrapper"]:hover .card-img-container img {
     opacity: 1.0;
 }
 
-/* ── Botões Brancos de Título (Forçando a cor das letras e fundo branco) ── */
-div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"] {
+/* ── Botões Brancos de Título (FORÇANDO BRANCO E PRETO) ── */
+/* Usamos :not([kind="primary"]) para não estragar o botão azul do Login */
+div[data-testid="stVerticalBlockBorderWrapper"] button:not([kind="primary"]) {
     background-color: #ffffff !important;
     background: #ffffff !important;
     border: none !important;
-    border-radius: 6px !important;
+    border-radius: 4px !important;
     width: 100% !important;
-    min-height: 40px !important;
-    padding: 8px 12px !important;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
-    transition: all 0.2s ease !important;
+    min-height: 38px !important;
+    padding: 6px 12px !important;
+    margin-top: 5px !important;
 }
-/* Força TUDO dentro do botão a ficar azul marinho escuro */
-div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"] * {
-    color: #0B3C5D !important;
+div[data-testid="stVerticalBlockBorderWrapper"] button:not([kind="primary"]) * {
+    color: #000000 !important; /* TEXTO PRETO */
     font-weight: 800 !important;
-    font-size: 15px !important;
-    margin: 0 !important;
+    font-size: 14px !important;
 }
-div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"]:hover {
-    background-color: #e0f2ff !important;
-    background: #e0f2ff !important;
-    transform: scale(1.02) !important;
+div[data-testid="stVerticalBlockBorderWrapper"] button:not([kind="primary"]):hover {
+    background-color: #e6e6e6 !important;
+    background: #e6e6e6 !important;
 }
 
 /* ── Formatação de Texto de Horários ── */
 .texto-horario {
-    font-size: 12.5px;
-    color: #ffffff;
+    font-size: 12px;
+    color: #e6edf3;
     line-height: 1.4;
     font-weight: 500;
     min-height: 36px;
@@ -182,36 +172,38 @@ div[data-testid="stVerticalBlockBorderWrapper"] button[kind="secondary"]:hover {
     align-items: center;
     justify-content: center;
     text-align: center;
-    margin-top: 4px;
+    margin-top: 8px;
 }
 
 /* ── Títulos das Linhas (Setores) ── */
 .linha-titulo-sec {
-    font-size: 14px;
+    font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: #0093E9;
-    margin-bottom: 10px;
-    margin-top: 25px;
+    color: #5cb3e6;
+    margin-bottom: 8px;
+    margin-top: 15px;
     font-weight: 700;
-    border-left: 3px solid #0093E9;
+    border-left: 3px solid #1f8bbf;
     padding-left: 8px;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 6. TELA DE LOGIN ÚNICA DO PORTAL (MAIS QUADRADA E CENTRALIZADA)
+# 6. TELA DE LOGIN ÚNICA DO PORTAL (MAIOR E QUADRADA)
 # ─────────────────────────────────────────────────────────────────────────────
 if st.session_state['usuario_logado'] is None:
-    # Adicionando um pouco de espaço extra acima do login para centrar melhor verticalmente
     st.write("<br><br><br>", unsafe_allow_html=True)
     
-    # Ajustei a coluna do meio (1.2) para que a caixa fique mais quadrada e não tão esticada
-    _, col2, _ = st.columns([1, 1.2, 1])
+    # Aumentando a largura da coluna central para 1.8 (deixa a caixa mais imponente)
+    _, col2, _ = st.columns([1, 1.8, 1])
     
     with col2:
         with st.container(border=True):
+            # Espaço extra interno para deixar "quadrado"
+            st.write("<br>", unsafe_allow_html=True)
+            
             st.markdown("""
                 <div style='text-align:center;'>
                     <h2 style='margin-bottom:0; color:white;'>Portal de Pedidos</h2>
@@ -224,6 +216,7 @@ if st.session_state['usuario_logado'] is None:
             usuarios_permitidos = ["Selecione...", "Administrador"] + LOJAS_LOGIN
             usuario_selecionado = st.selectbox("👤 Usuário de acesso:", usuarios_permitidos)
             senha_digitada = st.text_input("🔑 Senha de acesso:", type="password", autocomplete="off")
+            
             st.write("<br>", unsafe_allow_html=True)
 
             if st.button("Entrar no Sistema", type="primary", use_container_width=True):
@@ -237,6 +230,8 @@ if st.session_state['usuario_logado'] is None:
                     st.rerun()
                 elif senha_digitada:
                     st.error("⚠️ Senha incorreta. Tente novamente.")
+            
+            st.write("<br>", unsafe_allow_html=True)
     st.stop()
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -246,7 +241,6 @@ def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
     img_src = imagem_para_b64(caminho_imagem)
     
     with st.container(border=True):
-        # Imagem na proporção exata
         if img_src:
             st.markdown(f"""
             <div class="card-img-container">
@@ -260,18 +254,16 @@ def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
             </div>
             """, unsafe_allow_html=True)
         
-        # O botão branco (agora blindado pelo CSS Global)
+        # Botão branco com texto preto
         if st.button(titulo, key=f"btn_{chave_modulo}", use_container_width=True):
             st.session_state['modulo_ativo'] = chave_modulo
             st.rerun()
             
-        # Textos e Horários alinhados e brancos
         st.markdown(f'<div class="texto-horario">{subtitulo}</div>', unsafe_allow_html=True)
 
 def renderizar_dashboard():
-    # Banner Principal
     logo_src = imagem_para_b64("passaro_logo.png")
-    img_tag = f'<img src="{logo_src}" class="banner-logo" alt="Logo">' if logo_src else '<span style="font-size:28px">🛒</span>'
+    img_tag = f'<img src="{logo_src}" class="banner-logo" alt="Logo">' if logo_src else '<span style="font-size:28px">🦆</span>'
     
     st.markdown(f"""
     <div class="banner-container">
@@ -281,7 +273,7 @@ def renderizar_dashboard():
     """, unsafe_allow_html=True)
 
     # --- LINHA 1 ---
-    st.markdown('<div class="linha-titulo-sec">🥦 Setor Hortifruti (FLV)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="linha-titulo-sec">🥬 Setor Hortifruti (FLV)</div>', unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4, gap="medium")
     with c1: criar_card("Folhagem", "Seg a Sáb até 12:00hrs", IMG_FOLHAGEM, "🥬", "flv_folhagem")
     with c2: criar_card("FLV Normal", "Terças-feira até 17:00hrs<br>Quintas-feira até 14:00hrs", IMG_FLV, "🍎", "flv_normal")
@@ -303,11 +295,12 @@ def renderizar_dashboard():
     with c3: criar_card("Matéria Prima", "Até Sábado", "materiaprima.jpg", "🌾", "materia_prima")
 
     # ─────────────────────────────────────────────
-    # RODAPÉ ELEGÂNTE E RESTAURADO
+    # RODAPÉ
     # ─────────────────────────────────────────────
-    st.write("<br><br>", unsafe_allow_html=True)
+    # Adicionado quebras de linha para garantir que o rodapé apareça mesmo com o zoom
+    st.write("<br><br><br>", unsafe_allow_html=True)
     st.markdown("""
-    <div style="text-align:center; margin-top:30px; margin-bottom: 20px; color:#7d8590; font-size:14px; font-weight: 500;">
+    <div style="text-align:center; margin-top:20px; padding-bottom: 20px; color:#4b5563; font-size:12px; font-weight: 500;">
         Molicenter Supermercados © 2026 — Painel Web de Pedidos Centralizados
     </div>
     """, unsafe_allow_html=True)
