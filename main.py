@@ -14,16 +14,16 @@ st.set_page_config(
 # 2. IMPORTAÇÃO DOS MÓDULOS (Certifique-se de ter trocado - por _)
 # ─────────────────────────────────────────────────────────────────────────────
 # Descomente as linhas abaixo conforme for subindo os arquivos ajustados
-# import flv_folhagem
-# import flv_normal
-# import flv_ofertas
-# import flv_oriental
-# import acougue_total
-# import acougue_especiais
-# import acougue_pecas
-# import embalagem
-# import padaria_confeitaria
-# import materia_prima
+import flv_folhagem
+import flv_normal
+import flv_ofertas
+import flv_oriental
+import acougue_total
+import acougue_especiais
+import acougue_pecas
+import embalagem
+import padaria_confeitaria
+import materia_prima
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. VARIÁVEIS DE SESSÃO
