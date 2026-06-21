@@ -75,10 +75,10 @@ st.markdown("""
     zoom: 0.70 !important; /* Ajuste fino: compacto para os cards, mas legível no login */
 }
 
-/* Ocultar Menu e Cabeçalho Nativo do Streamlit */
+/* Ocultar Menu e Rodapé, MAS DEIXAR O CABEÇALHO TRANSPARENTE PARA NÃO SUMIR O BOTÃO DA SIDEBAR */
 #MainMenu {visibility: hidden;}
-header {visibility: hidden;}
 footer {visibility: hidden;}
+header {background-color: transparent !important;} /* <- A MÁGICA ESTÁ AQUI */
 
 /* ── Banner Superior Azul Escuro ── */
 .banner-container {
@@ -89,6 +89,7 @@ footer {visibility: hidden;}
     display: flex;
     align-items: center;
     gap: 14px;
+    box-shadow: 0 4px 15px rgba(0, 147, 233, 0.15);
     border: 1px solid rgba(255,255,255,0.1);
 }
 .banner-logo {
@@ -263,7 +264,7 @@ def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
 
 def renderizar_dashboard():
     logo_src = imagem_para_b64("passaro_logo.png")
-    img_tag = f'<img src="{logo_src}" class="banner-logo" alt="Logo">' if logo_src else '<span style="font-size:28px">🦆</span>'
+    img_tag = f'<img src="{logo_src}" class="banner-logo" alt="Logo">' if logo_src else '<span style="font-size:28px">🛒</span>'
     
     st.markdown(f"""
     <div class="banner-container">
@@ -273,7 +274,7 @@ def renderizar_dashboard():
     """, unsafe_allow_html=True)
 
     # --- LINHA 1 ---
-    st.markdown('<div class="linha-titulo-sec">🥬 Setor Hortifruti (FLV)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="linha-titulo-sec">🥦 Setor Hortifruti (FLV)</div>', unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4, gap="medium")
     with c1: criar_card("Folhagem", "Seg a Sáb até 12:00hrs", IMG_FOLHAGEM, "🥬", "flv_folhagem")
     with c2: criar_card("FLV Normal", "Terças-feira até 17:00hrs<br>Quintas-feira até 14:00hrs", IMG_FLV, "🍎", "flv_normal")
@@ -297,7 +298,6 @@ def renderizar_dashboard():
     # ─────────────────────────────────────────────
     # RODAPÉ
     # ─────────────────────────────────────────────
-    # Adicionado quebras de linha para garantir que o rodapé apareça mesmo com o zoom
     st.write("<br><br><br>", unsafe_allow_html=True)
     st.markdown("""
     <div style="text-align:center; margin-top:20px; padding-bottom: 20px; color:#4b5563; font-size:12px; font-weight: 500;">
