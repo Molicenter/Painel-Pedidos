@@ -5,7 +5,7 @@ import streamlit as st
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Gestão Pedidos - Molicenter",
-    page_icon="📦",
+    page_icon="📜",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -25,6 +25,20 @@ import acougue_pecas
 import embalagem
 import padaria_confeitaria
 import materia_prima
+
+# ─────────────────────────────────────────────
+# IMAGENS LOCAIS E LINKS EXTERNOS (FALLBACK)
+# ─────────────────────────────────────────────
+logo_b64           = get_base64_image("passaro_logo.png")
+embalagens_b64     = get_base64_image("Embalagens.jpg")
+materiaprima_b64   = get_base64_image("materiaprima.jpg")
+pioneiros_b64      = get_base64_image("Pioneiros.jpg")
+
+IMG_FOLHAGEM = "https://images.unsplash.com/photo-1574316071802-0d684efa7bf5?w=400"
+IMG_FLV      = "https://images.unsplash.com/photo-1610348725531-843dff563e2c?w=400"
+IMG_ORIENTAL = "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400"
+IMG_ACOUGUE  = "https://images.unsplash.com/photo-1544025162-d76694265947?w=400"
+IMG_PADARIA  = "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. VARIÁVEIS DE SESSÃO GLOBAIS
