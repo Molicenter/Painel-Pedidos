@@ -203,16 +203,59 @@ def iniciar_tela():
     elif perfil_navegacao == "Visão Fornecedores (Resumo)":
         st.markdown("<div class='topbar-loja'><div class='topbar-title'>🚚 Resumo por Fornecedor</div></div>", unsafe_allow_html=True)
         
-        # ADD: Botão de imprimir no topo, alinhado à direita
-        _, col_btn = st.columns([8, 2])
-        with col_btn:
-            if st.button("🖨️ Imprimir", key="btn_imprimir_forn", use_container_width=True):
-                components.html("<script>window.parent.print();</script>", height=0)
-                
         df_all = carregar_pedidos()
         df_cat = carregar_catalogo_folhagem()
         
-        # AJUSTE VISUAL: st.column_config segurando as larguras para o dataframe
+        # ─── GERAÇÃO DO ARQUIVO EXCEL CONSOLIDADO EM MEMÓRIA ───
+        buffer = io.BytesIO()
+        df_excel_list = []
+        
+        for forn in df_cat["Fornecedor"].dropna().unique():
+            df_forn = df_all[df_all["Fornecedor"] == forn].copy()
+            if df_forn.empty: continue
+            
+            df_cat_forn = df_cat[df_cat["Fornecedor"] == forn]
+            lojas_ativas = [loja for loja in LOJAS if df_cat_forn[loja].any()]
+            
+            if not lojas_ativas:
+                continue
+                
+            df_forn["TOTAL"] = df_forn[lojas_ativas].sum(axis=1)
+            
+            # Monta estrutura limpa para o Excel
+            df_forn_export = df_forn[["Código", "Descrição"] + lojas_ativas + ["TOTAL"]].copy()
+            df_forn_export.insert(0, "Fornecedor", forn)
+            df_excel_list.append(df_forn_export)
+            
+        if df_excel_list:
+            df_final_excel = pd.concat(df_excel_list, ignore_index=True)
+            with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+                df_final_excel.to_excel(writer, index=False, sheet_name="Resumo_Pedidos")
+            excel_data = buffer.getvalue()
+        else:
+            excel_data = None
+
+        # ─── BARRA DE BOTÕES (IMPRIMIR E EXPORTAR EXCEL) ───
+        c1, c2, _ = st.columns([2, 2, 6])
+        with c1:
+            if st.button("🖨️ Imprimir", key="btn_imprimir_forn", use_container_width=True):
+                components.html("<script>window.parent.print();</script>", height=0)
+        with c2:
+            if excel_data:
+                st.download_button(
+                    label="📊 Exportar Excel",
+                    data=excel_data,
+                    file_name="resumo_pedidos_folhagem.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                    key="btn_excel_forn"
+                )
+            else:
+                st.button("📊 Exportar Excel", disabled=True, use_container_width=True)
+
+        st.divider()
+
+        # Configuração de largura fixa das colunas para manter o alinhamento visual
         col_cfg_resumo = {
             "Código": st.column_config.NumberColumn("Código", width="small"),
             "Descrição": st.column_config.TextColumn("Descrição", width="large"),
@@ -221,6 +264,7 @@ def iniciar_tela():
         for l in LOJAS:
             col_cfg_resumo[l] = st.column_config.NumberColumn(l, width="small")
 
+        # Renderização visual na tela (Blocos individuais por Fornecedor)
         for forn in df_cat["Fornecedor"].dropna().unique():
             df_forn = df_all[df_all["Fornecedor"] == forn].copy()
             if df_forn.empty: continue
@@ -237,7 +281,6 @@ def iniciar_tela():
                 st.markdown(f"##### Fornecedor: {forn}")
                 colunas_exibicao = ["Código", "Descrição"] + lojas_ativas + ["TOTAL"]
                 
-                # Mantido o st.dataframe para travar o layout alinhado
                 st.dataframe(
                     df_forn[colunas_exibicao], 
                     hide_index=True, 
@@ -257,4 +300,4 @@ def iniciar_tela():
         
         edited_cat = st.data_editor(df_catalogo[["Fornecedor", "Código", "Descrição", "Nome Personalizado"] + LOJAS], use_container_width=True, hide_index=True, height=400, num_rows="dynamic", column_config=col_cfg_c, key="cat_editor")
         if st.button("💾 Salvar Estrutura do Catálogo", type="primary"):
-            if salvar_catalogo(edited_cat): st.success("Catálogo atualizado!"); st.rerun()
+            if salvar_catalogo(edited_cat): st.success("Catálogo updated!"); st.rerun()
