@@ -292,10 +292,17 @@ def renderizar_dashboard():
     logo_src = imagem_para_b64("passaro_logo.png")
     img_tag = f'<img src="{logo_src}" class="banner-logo" alt="Logo">' if logo_src else '<span style="font-size:28px">🛒</span>'
     
+    # 1. Pegamos a loja/usuário que está logado
+    loja_logada = st.session_state.get('usuario_logado', '')
+    
+    # 2. Injetamos a variável {loja_logada} no banner
     st.markdown(f"""
     <div class="banner-container">
         {img_tag}
-        <div class="banner-title">Gestão Pedidos - Molicenter</div>
+        <div class="banner-title">
+            Gestão Pedidos - Molicenter 
+            <span style="font-size: 18px; font-weight: 500; color: #a5d8ff;">&nbsp; --- Visão: {loja_logada}</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
