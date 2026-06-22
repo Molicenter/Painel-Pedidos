@@ -202,10 +202,17 @@ def iniciar_tela():
     # ─────────────────────────────────────────────
     elif perfil_navegacao == "Visão Fornecedores (Resumo)":
         st.markdown("<div class='topbar-loja'><div class='topbar-title'>🚚 Resumo por Fornecedor</div></div>", unsafe_allow_html=True)
+        
+        # ADD: Botão de imprimir no topo, alinhado à direita
+        _, col_btn = st.columns([8, 2])
+        with col_btn:
+            if st.button("🖨️ Imprimir", key="btn_imprimir_forn", use_container_width=True):
+                components.html("<script>window.parent.print();</script>", height=0)
+                
         df_all = carregar_pedidos()
         df_cat = carregar_catalogo_folhagem()
         
-        # AJUSTE VISUAL: O st.column_config agora vai segurar firme as larguras.
+        # AJUSTE VISUAL: st.column_config segurando as larguras para o dataframe
         col_cfg_resumo = {
             "Código": st.column_config.NumberColumn("Código", width="small"),
             "Descrição": st.column_config.TextColumn("Descrição", width="large"),
@@ -230,7 +237,7 @@ def iniciar_tela():
                 st.markdown(f"##### Fornecedor: {forn}")
                 colunas_exibicao = ["Código", "Descrição"] + lojas_ativas + ["TOTAL"]
                 
-                # Mudamos para st.dataframe (apenas leitura) e desativamos o use_container_width
+                # Mantido o st.dataframe para travar o layout alinhado
                 st.dataframe(
                     df_forn[colunas_exibicao], 
                     hide_index=True, 
