@@ -207,26 +207,35 @@ div[data-testid="stVerticalBlockBorderWrapper"] button:not([kind="primary"]):hov
 if st.session_state['usuario_logado'] is None:
     st.write("<br><br><br>", unsafe_allow_html=True)
     
+    # Aumentando a largura da coluna central para 1.8 (deixa a caixa mais imponente)
     _, col2, _ = st.columns([1, 1, 1])
     
     with col2:
         with st.container(border=True):
+            # Espaço extra interno para deixar "quadrado"
             st.write("<br>", unsafe_allow_html=True)
             
-            st.markdown("""
-                <div style='text-align:center;'>
-                    <h2 style='margin-bottom:0; color:white;'>Portal de Pedidos</h2>
-                    <p style='color:#7d8590;font-size:14px;'>Acesso Unificado — Molicenter</p>
-                </div>
-            """, unsafe_allow_html=True)
-    
-    with logo_col:
+            # --- INÍCIO DA MUDANÇA: Sub-colunas para alinhar Título e Logo ---
+            # Proporção 1:4:1 para manter o texto centralizado na caixa
+            _, title_col, logo_col = st.columns([1, 4, 1])
+            
+            with title_col:
+                st.markdown("""
+                    <div style='text-align:center;'>
+                        <h2 style='margin-bottom:0; color:white;'>Portal de Pedidos</h2>
+                        <p style='color:#7d8590;font-size:14px;'>Acesso Unificado — Molicenter</p>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+            with logo_col:
                 # Opcional: Adicionar um pequeno espaço para alinhar verticalmente com o texto
                 st.write("") 
                 try:
                     st.image("passaro_logo.png", width=60)
                 except Exception:
+                    # Centralizando o emoji para caso a imagem falhe
                     st.markdown("<div style='text-align:center; font-size:30px;'>🥬</div>", unsafe_allow_html=True)
+            # --- FIM DA MUDANÇA ---
         
             st.divider()
             
