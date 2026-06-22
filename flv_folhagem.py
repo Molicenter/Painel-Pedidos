@@ -205,26 +205,40 @@ def iniciar_tela():
         df_all = carregar_pedidos()
         df_cat = carregar_catalogo_folhagem()
         
+        # AJUSTE VISUAL: Criação de um dicionário de configuração de colunas
+        # A "Descrição" ganha width="large" para absorver o espaço e não deixar os números esticarem.
+        col_cfg_resumo = {
+            "Código": st.column_config.NumberColumn("Código", width="small", disabled=True),
+            "Descrição": st.column_config.TextColumn("Descrição", width="large", disabled=True),
+            "TOTAL": st.column_config.NumberColumn("TOTAL", width="small", disabled=True)
+        }
+        for l in LOJAS:
+            col_cfg_resumo[l] = st.column_config.NumberColumn(l, width="small", disabled=True)
+
         for forn in df_cat["Fornecedor"].dropna().unique():
             df_forn = df_all[df_all["Fornecedor"] == forn].copy()
             if df_forn.empty: continue
             
-            # NOVO AJUSTE: Identifica quais lojas estão ativas no catálogo para ESTE fornecedor
             df_cat_forn = df_cat[df_cat["Fornecedor"] == forn]
             lojas_ativas = [loja for loja in LOJAS if df_cat_forn[loja].any()]
             
-            # Se não houver nenhuma loja ativa para o fornecedor, não mostra o quadro
             if not lojas_ativas:
                 continue
                 
-            # Calcula o TOTAL somando apenas as lojas que estão ativas
             df_forn["TOTAL"] = df_forn[lojas_ativas].sum(axis=1)
             
             with st.container(border=True):
                 st.markdown(f"##### Fornecedor: {forn}")
-                # Exibe apenas as lojas que estão ativas para este fornecedor
                 colunas_exibicao = ["Código", "Descrição"] + lojas_ativas + ["TOTAL"]
-                st.data_editor(df_forn[colunas_exibicao], hide_index=True, use_container_width=True, key=f"f_{forn}")
+                
+                # st.data_editor agora usa o column_config criado acima
+                st.data_editor(
+                    df_forn[colunas_exibicao], 
+                    hide_index=True, 
+                    use_container_width=True, 
+                    column_config=col_cfg_resumo,
+                    key=f"f_{forn}"
+                )
 
     # ─────────────────────────────────────────────
     # ROTA 4 — CATÁLOGO DE PRODUTOS
