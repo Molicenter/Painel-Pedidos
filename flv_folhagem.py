@@ -204,15 +204,26 @@ def iniciar_tela():
         st.markdown("<div class='topbar-loja'><div class='topbar-title'>🚚 Resumo por Fornecedor</div></div>", unsafe_allow_html=True)
         df_all = carregar_pedidos()
         df_cat = carregar_catalogo_folhagem()
+        
         for forn in df_cat["Fornecedor"].dropna().unique():
             df_forn = df_all[df_all["Fornecedor"] == forn].copy()
             if df_forn.empty: continue
-            df_forn["TOTAL"] = df_forn[LOJAS].sum(axis=1)
+            
+            # NOVO AJUSTE: Identifica quais lojas estão ativas no catálogo para ESTE fornecedor
+            df_cat_forn = df_cat[df_cat["Fornecedor"] == forn]
+            lojas_ativas = [loja for loja in LOJAS if df_cat_forn[loja].any()]
+            
+            # Se não houver nenhuma loja ativa para o fornecedor, não mostra o quadro
+            if not lojas_ativas:
+                continue
+                
+            # Calcula o TOTAL somando apenas as lojas que estão ativas
+            df_forn["TOTAL"] = df_forn[lojas_ativas].sum(axis=1)
+            
             with st.container(border=True):
                 st.markdown(f"##### Fornecedor: {forn}")
-                
-                # O AJUSTE FOI FEITO AQUI: Incluindo as lojas na lista de colunas a serem exibidas
-                colunas_exibicao = ["Código", "Descrição"] + LOJAS + ["TOTAL"]
+                # Exibe apenas as lojas que estão ativas para este fornecedor
+                colunas_exibicao = ["Código", "Descrição"] + lojas_ativas + ["TOTAL"]
                 st.data_editor(df_forn[colunas_exibicao], hide_index=True, use_container_width=True, key=f"f_{forn}")
 
     # ─────────────────────────────────────────────
