@@ -344,6 +344,12 @@ def carregar_pedidos():
         else:
             df_pedidos[loja] = ""
 
+    # Preserva coluna de Observação
+    if "Observação" not in df_pedidos.columns:
+        df_pedidos["Observação"] = ""
+    else:
+        df_pedidos["Observação"] = df_pedidos["Observação"].fillna("").astype(str)
+
     return df_pedidos
 
 def salvar_pedidos(df_to_save):
@@ -462,7 +468,8 @@ def iniciar_tela():
         table.print-sep th:nth-child(1), table.print-sep td:nth-child(1) { width: 14% !important; text-align: left !important; }
         table.print-sep th:nth-child(2), table.print-sep td:nth-child(2) { width: 6%  !important; text-align: center !important; }
         table.print-sep th:nth-child(3), table.print-sep td:nth-child(3) { width: 24% !important; text-align: left !important; }
-        table.print-sep th:nth-child(n+4):nth-child(-n+11), table.print-sep td:nth-child(n+4):nth-child(-n+11) { width: 7% !important; text-align: center !important; }
+        table.print-sep th:nth-child(n+4):nth-child(-n+11), table.print-sep td:nth-child(n+4):nth-child(-n+11) { width: 6% !important; text-align: center !important; }
+        table.print-sep th:last-child, table.print-sep td:last-child { width: 12% !important; text-align: left !important; font-style: italic; color: #444 !important; }
     }
     @media screen { #print-section { display: none !important; } }
     </style>
@@ -543,15 +550,20 @@ def iniciar_tela():
                 st.warning("A base de pedidos está vazia. Cadastre produtos no Catálogo primeiro.")
                 st.stop()
 
-            col_cfg = {
-                "Fornecedor":  st.column_config.TextColumn("Categoria", disabled=True),
-                "Código":      st.column_config.NumberColumn("Cód.", width=80, format="%d", disabled=True),
-                "Descrição":   st.column_config.TextColumn("Produto", disabled=True),
-            }
-            for loja, novo_nome in MAPA_LOJAS.items():
-                col_cfg[loja] = st.column_config.TextColumn(novo_nome)
+         col_cfg = {
+           "Fornecedor":  st.column_config.TextColumn("Categoria", disabled=True),
+           "Código":      st.column_config.NumberColumn("Cód.", width=80, format="%d", disabled=True),
+           "Descrição":   st.column_config.TextColumn("Produto", disabled=True),
+           "Observação":  st.column_config.TextColumn("Observação", width=180),
+         }
+         for loja, novo_nome in MAPA_LOJAS.items():
+           col_cfg[loja] = st.column_config.TextColumn(novo_nome)
 
-            cols_order = ["Fornecedor", "Código", "Descrição"] + LOJAS
+            # Garante que a coluna Observação existe no df_base
+            if "Observação" not in df_base.columns:
+            df_base["Observação"] = ""
+
+            cols_order = ["Fornecedor", "Código", "Descrição"] + LOJAS + ["Observação"]
             df_exibir = df_base[cols_order]
 
             df_editado = st.data_editor(
@@ -572,11 +584,14 @@ def iniciar_tela():
 
             with col_salvar:
                 if st.button("💾 Salvar Alterações", type="primary", use_container_width=True):
-                    df_to_save = carregar_pedidos()
+                df_to_save = carregar_pedidos()
+                    if "Observação" not in df_to_save.columns:
+                    df_to_save["Observação"] = ""
                     for _, row_edit in df_editado.iterrows():
-                        mask = (df_to_save["Fornecedor"] == row_edit["Fornecedor"]) & (df_to_save["Código"] == row_edit["Código"])
-                        for loja in LOJAS:
-                            df_to_save.loc[mask, loja] = str(row_edit[loja])
+                    mask = (df_to_save["Fornecedor"] == row_edit["Fornecedor"]) & (df_to_save["Código"] == row_edit["Código"])
+                    for loja in LOJAS:
+                    df_to_save.loc[mask, loja] = str(row_edit[loja])
+                    df_to_save.loc[mask, "Observação"] = str(row_edit.get("Observação", ""))
                     salvar_pedidos(df_to_save)
                     st.success("✅ Pedidos salvos na nuvem com sucesso!")
                     st.rerun()
