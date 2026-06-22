@@ -210,7 +210,10 @@ def iniciar_tela():
             df_forn["TOTAL"] = df_forn[LOJAS].sum(axis=1)
             with st.container(border=True):
                 st.markdown(f"##### Fornecedor: {forn}")
-                st.data_editor(df_forn[["Código", "Descrição", "TOTAL"]], hide_index=True, use_container_width=True, key=f"f_{forn}")
+                
+                # O AJUSTE FOI FEITO AQUI: Incluindo as lojas na lista de colunas a serem exibidas
+                colunas_exibicao = ["Código", "Descrição"] + LOJAS + ["TOTAL"]
+                st.data_editor(df_forn[colunas_exibicao], hide_index=True, use_container_width=True, key=f"f_{forn}")
 
     # ─────────────────────────────────────────────
     # ROTA 4 — CATÁLOGO DE PRODUTOS
