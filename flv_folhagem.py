@@ -223,7 +223,7 @@ def iniciar_tela():
             df_forn = df_all[df_all["Fornecedor"] == forn].copy()
             if df_forn.empty: continue
             
-            # Filtro de linhas: Ocila o produto se ele não estiver ativo no catálogo deste fornecedor
+            # Filtro de linhas: Oculta o produto se ele não estiver ativo no catálogo deste fornecedor
             df_cat_forn = df_cat[df_cat["Fornecedor"] == forn]
             codigos_habilitados = df_cat_forn["Código"].unique()
             df_forn = df_forn[df_forn["Código"].isin(codigos_habilitados)].copy()
@@ -238,7 +238,7 @@ def iniciar_tela():
             df_forn_export.insert(0, "Fornecedor", forn)
             df_excel_list.append(df_forn_export)
             
-            # Tratamento visual da tabela (Ocultando o número 0)
+            # Tratamento visual da tabela (Ocultando o número 0 na tela)
             df_display = df_forn[colunas_exibicao].copy()
             df_display["Código"] = df_display["Código"].astype(str)
             
@@ -261,19 +261,21 @@ def iniciar_tela():
         buffer = io.BytesIO()
         if df_excel_list:
             df_final_excel = pd.concat(df_excel_list, ignore_index=True)
+            
+            # Limpeza dos ZEROS do Excel (substitui 0 por vazio/None para Excel)
+            for col in LOJAS + ["TOTAL"]:
+                df_final_excel[col] = df_final_excel[col].apply(lambda x: None if x == 0 else x)
+
             with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
                 df_final_excel.to_excel(writer, index=False, sheet_name="Resumo_Pedidos")
             excel_data = buffer.getvalue()
         else:
             excel_data = None
 
-        # ─── BARRA DE BOTÕES INTERNA (POSICIONADA ABAIXO) ───
+        # ─── BARRA DE BOTÕES INTERNA (POSICIONADA ABAIXO SEM O BOTÃO IMPRIMIR) ───
         st.markdown("<br>", unsafe_allow_html=True)
-        c1, c2, _ = st.columns([2, 2, 6])
+        c1, _ = st.columns([3, 7])
         with c1:
-            if st.button("🖨️ Imprimir", key="btn_imprimir_forn", use_container_width=True):
-                components.html("<script>window.parent.print();</script>", height=0)
-        with c2:
             if excel_data:
                 st.download_button(
                     label="📊 Exportar Excel",
