@@ -301,7 +301,7 @@ def renderizar_dashboard():
         {img_tag}
         <div class="banner-title">
             Gestão Pedidos - Molicenter 
-            <span style="font-size: 18px; font-weight: 500; color: #a5d8ff;">&nbsp; --- Visão: {loja_logada}</span>
+            <span style="font-size: 18px; font-weight: 500; color: #a5d8ff;">&nbsp; ---> Visão: {loja_logada}</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
