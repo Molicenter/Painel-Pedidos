@@ -206,27 +206,59 @@ def iniciar_tela():
         df_all = carregar_pedidos()
         df_cat = carregar_catalogo_folhagem()
         
-        # ─── GERAÇÃO DO ARQUIVO EXCEL CONSOLIDADO EM MEMÓRIA ───
-        buffer = io.BytesIO()
+        # Dicionário de tamanho fixo em pixels para garantir alinhamento perfeito de colunas entre tabelas
+        col_cfg_resumo = {
+            "Código": st.column_config.TextColumn("Código", width=60),
+            "Descrição": st.column_config.TextColumn("Descrição", width=280),
+            "TOTAL": st.column_config.TextColumn("TOTAL", width=70)
+        }
+        for l in LOJAS:
+            col_cfg_resumo[l] = st.column_config.TextColumn(l, width=65)
+
         df_excel_list = []
-        
+        colunas_exibicao = ["Código", "Descrição"] + LOJAS + ["TOTAL"]
+
+        # Renderização visual dos blocos na tela
         for forn in df_cat["Fornecedor"].dropna().unique():
             df_forn = df_all[df_all["Fornecedor"] == forn].copy()
             if df_forn.empty: continue
             
+            # Filtro de linhas: Ocila o produto se ele não estiver ativo no catálogo deste fornecedor
             df_cat_forn = df_cat[df_cat["Fornecedor"] == forn]
-            lojas_ativas = [loja for loja in LOJAS if df_cat_forn[loja].any()]
+            codigos_habilitados = df_cat_forn["Código"].unique()
+            df_forn = df_forn[df_forn["Código"].isin(codigos_habilitados)].copy()
             
-            if not lojas_ativas:
-                continue
+            if df_forn.empty: continue
                 
-            df_forn["TOTAL"] = df_forn[lojas_ativas].sum(axis=1)
+            # Calcula o TOTAL mestre antes de mascarar os zeros
+            df_forn["TOTAL"] = df_forn[LOJAS].sum(axis=1)
             
-            # Monta estrutura limpa para o Excel
-            df_forn_export = df_forn[["Código", "Descrição"] + lojas_ativas + ["TOTAL"]].copy()
+            # Guardando base pura para o download do Excel
+            df_forn_export = df_forn[colunas_exibicao].copy()
             df_forn_export.insert(0, "Fornecedor", forn)
             df_excel_list.append(df_forn_export)
             
+            # Tratamento visual da tabela (Ocultando o número 0)
+            df_display = df_forn[colunas_exibicao].copy()
+            df_display["Código"] = df_display["Código"].astype(str)
+            
+            for col in LOJAS + ["TOTAL"]:
+                df_display[col] = pd.to_numeric(df_display[col], errors='coerce').fillna(0).astype(int)
+                df_display[col] = df_display[col].astype(str).replace({"0": ""})
+            
+            with st.container(border=True):
+                st.markdown(f"##### Fornecedor: {forn}")
+                
+                st.dataframe(
+                    df_display, 
+                    hide_index=True, 
+                    use_container_width=False, # Força a respeitar rigorosamente os pixels das colunas
+                    column_config=col_cfg_resumo,
+                    key=f"f_{forn}"
+                )
+
+        # ─── GERAÇÃO DO ARQUIVO EXCEL CONSOLIDADO ───
+        buffer = io.BytesIO()
         if df_excel_list:
             df_final_excel = pd.concat(df_excel_list, ignore_index=True)
             with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
@@ -235,7 +267,8 @@ def iniciar_tela():
         else:
             excel_data = None
 
-        # ─── BARRA DE BOTÕES (IMPRIMIR E EXPORTAR EXCEL) ───
+        # ─── BARRA DE BOTÕES INTERNA (POSICIONADA ABAIXO) ───
+        st.markdown("<br>", unsafe_allow_html=True)
         c1, c2, _ = st.columns([2, 2, 6])
         with c1:
             if st.button("🖨️ Imprimir", key="btn_imprimir_forn", use_container_width=True):
@@ -253,42 +286,6 @@ def iniciar_tela():
             else:
                 st.button("📊 Exportar Excel", disabled=True, use_container_width=True)
 
-        st.divider()
-
-        # Configuração de largura fixa das colunas para manter o alinhamento visual
-        col_cfg_resumo = {
-            "Código": st.column_config.NumberColumn("Código", width="small"),
-            "Descrição": st.column_config.TextColumn("Descrição", width="large"),
-            "TOTAL": st.column_config.NumberColumn("TOTAL", width="small")
-        }
-        for l in LOJAS:
-            col_cfg_resumo[l] = st.column_config.NumberColumn(l, width="small")
-
-        # Renderização visual na tela (Blocos individuais por Fornecedor)
-        for forn in df_cat["Fornecedor"].dropna().unique():
-            df_forn = df_all[df_all["Fornecedor"] == forn].copy()
-            if df_forn.empty: continue
-            
-            df_cat_forn = df_cat[df_cat["Fornecedor"] == forn]
-            lojas_ativas = [loja for loja in LOJAS if df_cat_forn[loja].any()]
-            
-            if not lojas_ativas:
-                continue
-                
-            df_forn["TOTAL"] = df_forn[lojas_ativas].sum(axis=1)
-            
-            with st.container(border=True):
-                st.markdown(f"##### Fornecedor: {forn}")
-                colunas_exibicao = ["Código", "Descrição"] + lojas_ativas + ["TOTAL"]
-                
-                st.dataframe(
-                    df_forn[colunas_exibicao], 
-                    hide_index=True, 
-                    use_container_width=False, 
-                    column_config=col_cfg_resumo,
-                    key=f"f_{forn}"
-                )
-
     # ─────────────────────────────────────────────
     # ROTA 4 — CATÁLOGO DE PRODUTOS
     # ─────────────────────────────────────────────
@@ -300,4 +297,4 @@ def iniciar_tela():
         
         edited_cat = st.data_editor(df_catalogo[["Fornecedor", "Código", "Descrição", "Nome Personalizado"] + LOJAS], use_container_width=True, hide_index=True, height=400, num_rows="dynamic", column_config=col_cfg_c, key="cat_editor")
         if st.button("💾 Salvar Estrutura do Catálogo", type="primary"):
-            if salvar_catalogo(edited_cat): st.success("Catálogo updated!"); st.rerun()
+            if salvar_catalogo(edited_cat): st.success("Catálogo atualizado!"); st.rerun()
