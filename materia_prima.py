@@ -448,21 +448,26 @@ def iniciar_tela():
         table.print-table td { white-space: nowrap !important; }
         table.print-table th { background-color: #d5d5d5 !important; font-weight: bold !important; text-align: center !important; white-space: normal !important; word-break: break-word !important; vertical-align: middle !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         table.print-table tr { break-inside: avoid !important; page-break-inside: avoid !important; }
+        
         table.print-loja { font-size: 10px !important; }
         table.print-loja th:nth-child(1), table.print-loja td:nth-child(1) { width: 15% !important; text-align: left !important; }
         table.print-loja th:nth-child(2), table.print-loja td:nth-child(2) { width: 10% !important; text-align: center !important; }
         table.print-loja th:nth-child(3), table.print-loja td:nth-child(3) { width: 45% !important; text-align: left !important; }
         table.print-loja th:nth-child(4), table.print-loja td:nth-child(4) { width: 15% !important; text-align: center !important; }
         table.print-loja th:nth-child(5), table.print-loja td:nth-child(5) { width: 15% !important; text-align: center !important; font-weight: bold !important; background-color: #eeeeee !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        
         table.print-forn { font-size: 8px !important; }
-        table.print-forn th:nth-child(1), table.print-forn td:nth-child(1) { width: 8% !important; text-align: center !important; }
-        table.print-forn th:nth-child(2), table.print-forn td:nth-child(2) { width: 36% !important; text-align: left !important; }
-        table.print-forn th:nth-child(n+3):nth-child(-n+10), table.print-forn td:nth-child(n+3):nth-child(-n+10) { width: 7% !important; text-align: center !important; }
+        table.print-forn th:nth-child(1), table.print-forn td:nth-child(1) { width: 6% !important; text-align: center !important; }
+        table.print-forn th:nth-child(2), table.print-forn td:nth-child(2) { width: 22% !important; text-align: left !important; }
+        table.print-forn th:nth-child(n+3):nth-child(-n+10), table.print-forn td:nth-child(n+3):nth-child(-n+10) { width: 6% !important; text-align: center !important; }
+        table.print-forn th:nth-child(11), table.print-forn td:nth-child(11) { width: 24% !important; text-align: left !important; } /* Coluna Observação */
+        
         table.print-sep { font-size: 9px !important; }
-        table.print-sep th:nth-child(1), table.print-sep td:nth-child(1) { width: 14% !important; text-align: left !important; }
-        table.print-sep th:nth-child(2), table.print-sep td:nth-child(2) { width: 6%  !important; text-align: center !important; }
-        table.print-sep th:nth-child(3), table.print-sep td:nth-child(3) { width: 24% !important; text-align: left !important; }
-        table.print-sep th:nth-child(n+4):nth-child(-n+11), table.print-sep td:nth-child(n+4):nth-child(-n+11) { width: 7% !important; text-align: center !important; }
+        table.print-sep th:nth-child(1), table.print-sep td:nth-child(1) { width: 12% !important; text-align: left !important; }
+        table.print-sep th:nth-child(2), table.print-sep td:nth-child(2) { width: 5%  !important; text-align: center !important; }
+        table.print-sep th:nth-child(3), table.print-sep td:nth-child(3) { width: 19% !important; text-align: left !important; }
+        table.print-sep th:nth-child(n+4):nth-child(-n+11), table.print-sep td:nth-child(n+4):nth-child(-n+11) { width: 5% !important; text-align: center !important; }
+        table.print-sep th:nth-child(12), table.print-sep td:nth-child(12) { width: 24% !important; text-align: left !important; } /* Coluna Observação */
     }
     @media screen { #print-section { display: none !important; } }
     </style>
@@ -559,7 +564,11 @@ def iniciar_tela():
                 column_config=col_cfg, key=f"sep_editor_{st.session_state['reset_counter_materia_prima']}"
             )
 
-            html_table = df_editado.to_html(index=False, classes=["print-table", "print-sep"])
+            # Preparando DataFrame de impressão com a coluna "Observação:"
+            df_imprimir_sep = df_editado.copy()
+            df_imprimir_sep["Observação:"] = ""
+            html_table = df_imprimir_sep.to_html(index=False, classes=["print-table", "print-sep"])
+            
             st.markdown(f"""<div id="print-section">
             <h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
                 Resumo de Separação — Matéria Prima
@@ -804,7 +813,10 @@ def iniciar_tela():
                         
                         st.markdown(f"""<div style="text-align:right; font-weight:700; margin-top:6px; color:var(--brown-bright); font-size:15px;">Total Geral: {total_geral} unidades</div>""", unsafe_allow_html=True)
 
-                        html_table = df_forn_edit.to_html(index=False, classes=["print-table", "print-forn"])
+                        # Preparando DataFrame de impressão com a coluna "Observação:"
+                        df_forn_print = df_forn_edit.copy()
+                        df_forn_print["Observação:"] = ""
+                        html_table = df_forn_print.to_html(index=False, classes=["print-table", "print-forn"])
                         for loja in LOJAS:
                             partes = loja.split(" ")
                             if len(partes) == 2:
