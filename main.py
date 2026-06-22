@@ -225,7 +225,9 @@ if st.session_state['usuario_logado'] is None:
                 st.write("") 
                 try:
                     st.image("passaro_logo.png", width=60)
-            
+                except Exception:
+                    st.markdown("<div style='text-align:center; font-size:30px;'>🥬</div>", unsafe_allow_html=True)
+        
             st.divider()
             
             LOJAS_LOGIN = ["Loja 01", "Loja 02", "Loja 03", "Loja 04", "Loja 05", "Loja 06", "Loja 07", "Loja 08"]
