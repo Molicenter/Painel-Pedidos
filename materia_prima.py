@@ -214,15 +214,21 @@ def gerar_excel_estilizado(df, sheet_name="Resumo"):
                         cell.alignment = Alignment(horizontal='left', vertical='center')
 
         for col in worksheet.columns:
-            max_length = 0
             col_letter = col[0].column_letter
-            for cell in col:
-                try:
-                    if len(str(cell.value)) > max_length:
-                        max_length = len(str(cell.value))
-                except:
-                    pass
-            worksheet.column_dimensions[col_letter].width = max_length + 2
+            col_header = col[0].value
+            
+            # Se for a coluna "Observação:", fixar largura equivalente a 3 colunas padrão
+            if col_header == 'Observação:':
+                worksheet.column_dimensions[col_letter].width = 30
+            else:
+                max_length = 0
+                for cell in col:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                worksheet.column_dimensions[col_letter].width = max_length + 2
 
         worksheet.sheet_properties.pageSetUpPr.fitToPage = True
         worksheet.page_setup.fitToWidth = 1
@@ -448,26 +454,21 @@ def iniciar_tela():
         table.print-table td { white-space: nowrap !important; }
         table.print-table th { background-color: #d5d5d5 !important; font-weight: bold !important; text-align: center !important; white-space: normal !important; word-break: break-word !important; vertical-align: middle !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         table.print-table tr { break-inside: avoid !important; page-break-inside: avoid !important; }
-        
         table.print-loja { font-size: 10px !important; }
         table.print-loja th:nth-child(1), table.print-loja td:nth-child(1) { width: 15% !important; text-align: left !important; }
         table.print-loja th:nth-child(2), table.print-loja td:nth-child(2) { width: 10% !important; text-align: center !important; }
         table.print-loja th:nth-child(3), table.print-loja td:nth-child(3) { width: 45% !important; text-align: left !important; }
         table.print-loja th:nth-child(4), table.print-loja td:nth-child(4) { width: 15% !important; text-align: center !important; }
         table.print-loja th:nth-child(5), table.print-loja td:nth-child(5) { width: 15% !important; text-align: center !important; font-weight: bold !important; background-color: #eeeeee !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        
         table.print-forn { font-size: 8px !important; }
-        table.print-forn th:nth-child(1), table.print-forn td:nth-child(1) { width: 6% !important; text-align: center !important; }
-        table.print-forn th:nth-child(2), table.print-forn td:nth-child(2) { width: 22% !important; text-align: left !important; }
-        table.print-forn th:nth-child(n+3):nth-child(-n+10), table.print-forn td:nth-child(n+3):nth-child(-n+10) { width: 6% !important; text-align: center !important; }
-        table.print-forn th:nth-child(11), table.print-forn td:nth-child(11) { width: 24% !important; text-align: left !important; } /* Coluna Observação */
-        
+        table.print-forn th:nth-child(1), table.print-forn td:nth-child(1) { width: 8% !important; text-align: center !important; }
+        table.print-forn th:nth-child(2), table.print-forn td:nth-child(2) { width: 36% !important; text-align: left !important; }
+        table.print-forn th:nth-child(n+3):nth-child(-n+10), table.print-forn td:nth-child(n+3):nth-child(-n+10) { width: 7% !important; text-align: center !important; }
         table.print-sep { font-size: 9px !important; }
-        table.print-sep th:nth-child(1), table.print-sep td:nth-child(1) { width: 12% !important; text-align: left !important; }
-        table.print-sep th:nth-child(2), table.print-sep td:nth-child(2) { width: 5%  !important; text-align: center !important; }
-        table.print-sep th:nth-child(3), table.print-sep td:nth-child(3) { width: 19% !important; text-align: left !important; }
-        table.print-sep th:nth-child(n+4):nth-child(-n+11), table.print-sep td:nth-child(n+4):nth-child(-n+11) { width: 5% !important; text-align: center !important; }
-        table.print-sep th:nth-child(12), table.print-sep td:nth-child(12) { width: 24% !important; text-align: left !important; } /* Coluna Observação */
+        table.print-sep th:nth-child(1), table.print-sep td:nth-child(1) { width: 14% !important; text-align: left !important; }
+        table.print-sep th:nth-child(2), table.print-sep td:nth-child(2) { width: 6%  !important; text-align: center !important; }
+        table.print-sep th:nth-child(3), table.print-sep td:nth-child(3) { width: 24% !important; text-align: left !important; }
+        table.print-sep th:nth-child(n+4):nth-child(-n+11), table.print-sep td:nth-child(n+4):nth-child(-n+11) { width: 7% !important; text-align: center !important; }
     }
     @media screen { #print-section { display: none !important; } }
     </style>
@@ -564,10 +565,7 @@ def iniciar_tela():
                 column_config=col_cfg, key=f"sep_editor_{st.session_state['reset_counter_materia_prima']}"
             )
 
-            # Preparando DataFrame de impressão com a coluna "Observação:"
-            df_imprimir_sep = df_editado.copy()
-            df_imprimir_sep["Observação:"] = ""
-            html_table = df_imprimir_sep.to_html(index=False, classes=["print-table", "print-sep"])
+            html_table = df_editado.to_html(index=False, classes=["print-table", "print-sep"])
             
             st.markdown(f"""<div id="print-section">
             <h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
@@ -592,11 +590,13 @@ def iniciar_tela():
 
             with col_csv:
                 df_csv = df_editado.copy().rename(columns=MAPA_LOJAS)
+                df_csv["Observação:"] = ""
                 csv = df_csv.to_csv(index=False).encode("utf-8")
                 st.download_button("⬇️ CSV", data=csv, file_name="separacao_materia_prima.csv", mime="text/csv", use_container_width=True)
 
             with col_excel:
                 df_exp = df_editado.copy().rename(columns=MAPA_LOJAS)
+                df_exp["Observação:"] = ""
                 excel_data = gerar_excel_estilizado(df_exp, "Separação Matéria Prima")
                 st.download_button("⬇️ Excel", data=excel_data, file_name="separacao_materia_prima.xlsx",
                                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
@@ -813,10 +813,7 @@ def iniciar_tela():
                         
                         st.markdown(f"""<div style="text-align:right; font-weight:700; margin-top:6px; color:var(--brown-bright); font-size:15px;">Total Geral: {total_geral} unidades</div>""", unsafe_allow_html=True)
 
-                        # Preparando DataFrame de impressão com a coluna "Observação:"
-                        df_forn_print = df_forn_edit.copy()
-                        df_forn_print["Observação:"] = ""
-                        html_table = df_forn_print.to_html(index=False, classes=["print-table", "print-forn"])
+                        html_table = df_forn_edit.to_html(index=False, classes=["print-table", "print-forn"])
                         for loja in LOJAS:
                             partes = loja.split(" ")
                             if len(partes) == 2:
@@ -849,12 +846,16 @@ def iniciar_tela():
 
         with col_csv:
             if not df_export.empty:
-                csv_str = df_export.to_csv(index=False).encode('utf-8')
+                df_export_csv = df_export.copy()
+                df_export_csv["Observação:"] = ""
+                csv_str = df_export_csv.to_csv(index=False).encode('utf-8')
                 st.download_button("⬇️ Exportar CSV", data=csv_str, file_name="visao_categoria.csv", mime="text/csv", use_container_width=True)
 
         with col_excel:
             if not df_export.empty:
-                excel_data = gerar_excel_estilizado(df_export, "Visão Categorias")
+                df_export_excel = df_export.copy()
+                df_export_excel["Observação:"] = ""
+                excel_data = gerar_excel_estilizado(df_export_excel, "Visão Categorias")
                 st.download_button("⬇️ Exportar Excel", data=excel_data, file_name="visao_categoria.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", use_container_width=True)
 
         with col_print:
