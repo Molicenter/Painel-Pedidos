@@ -149,15 +149,50 @@ def iniciar_tela():
             col_cfg = {"Fornecedor": st.column_config.TextColumn("Fornecedor", disabled=True), "Código": st.column_config.NumberColumn("Cód", disabled=True), "Descrição": st.column_config.TextColumn("Produto", disabled=True), "TOTAL GERAL": st.column_config.NumberColumn("TOTAL ▶️", disabled=True)}
             for loja in LOJAS: col_cfg[loja] = st.column_config.NumberColumn(loja, format="%d", min_value=0)
             
+            # O dataframe editável no ecrã
             df_editado = st.data_editor(df_base[["Fornecedor", "Código", "Descrição"] + LOJAS + ["TOTAL GERAL"]], hide_index=True, use_container_width=True, height=500, column_config=col_cfg, key=f"sep_editor_{st.session_state['reset_counter_folhagem']}")
             
             st.divider()
+
+            # ─── GERAÇÃO DO FICHEIRO EXCEL DA SEPARAÇÃO ───
+            buffer_sep = io.BytesIO()
+            df_excel_sep = df_editado.copy()
+            
+            # Limpeza dos ZEROS do Excel
+            for col in LOJAS + ["TOTAL GERAL"]:
+                if col in df_excel_sep.columns:
+                    df_excel_sep[col] = df_excel_sep[col].apply(lambda x: None if pd.isna(x) or x == 0 else x)
+
+            with pd.ExcelWriter(buffer_sep, engine='openpyxl') as writer:
+                df_excel_sep.to_excel(writer, index=False, sheet_name="Separacao")
+                worksheet_sep = writer.sheets["Separacao"]
+                
+                # Ajuste automático das larguras das colunas
+                for idx, col_name in enumerate(df_excel_sep.columns):
+                    max_content_len = df_excel_sep[col_name].fillna("").astype(str).str.len().max()
+                    if pd.isna(max_content_len):
+                        max_content_len = 0
+                    max_len = max(max_content_len, len(str(col_name))) + 2
+                    col_letter = chr(65 + idx)
+                    worksheet_sep.column_dimensions[col_letter].width = max_len
+                    
+            excel_data_sep = buffer_sep.getvalue()
+
+            # ─── BOTÕES ───
             c1, c2, c3 = st.columns([4, 3, 3])
             with c1:
                 if st.button("💾 Salvar Alterações", type="primary", use_container_width=True):
                     if salvar_pedidos(df_editado.drop(columns=["TOTAL GERAL"])): st.success("Salvo!"); st.rerun()
             with c2:
-                if st.button("🖨️ Imprimir", use_container_width=True): components.html("<script>window.parent.print();</script>", height=0)
+                # O botão de imprimir foi substituído pelo de download do Excel
+                st.download_button(
+                    label="📊 Baixar Excel",
+                    data=excel_data_sep,
+                    file_name="separacao_fechamento_folhagem.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                    key="btn_excel_sep"
+                )
             with c3:
                 if st.button("🚨 Zerar Todos", use_container_width=True): modal_zerar_pedidos()
 
@@ -206,7 +241,7 @@ def iniciar_tela():
         df_all = carregar_pedidos()
         df_cat = carregar_catalogo_folhagem()
         
-        # Dicionário de tamanho fixo em pixels para garantir alinhamento perfeito de colunas entre tabelas no ecrã
+        # Dicionário de tamanho fixo em pixels para garantir alinhamento perfeito
         col_cfg_resumo = {
             "Código": st.column_config.TextColumn("Código", width=60),
             "Descrição": st.column_config.TextColumn("Descrição", width=280),
@@ -218,27 +253,22 @@ def iniciar_tela():
         df_excel_list = []
         colunas_exibicao = ["Código", "Descrição"] + LOJAS + ["TOTAL"]
 
-        # Renderização visual dos blocos na tela
         for forn in df_cat["Fornecedor"].dropna().unique():
             df_forn = df_all[df_all["Fornecedor"] == forn].copy()
             if df_forn.empty: continue
             
-            # Filtro de linhas: Oculta o produto se não estiver ativo no catálogo deste fornecedor
             df_cat_forn = df_cat[df_cat["Fornecedor"] == forn]
             codigos_habilitados = df_cat_forn["Código"].unique()
             df_forn = df_forn[df_forn["Código"].isin(codigos_habilitados)].copy()
             
             if df_forn.empty: continue
                 
-            # Calcula o TOTAL mestre antes de mascarar os zeros
             df_forn["TOTAL"] = df_forn[LOJAS].sum(axis=1)
             
-            # Guardando base pura para o download do Excel
             df_forn_export = df_forn[colunas_exibicao].copy()
             df_forn_export.insert(0, "Fornecedor", forn)
             df_excel_list.append(df_forn_export)
             
-            # Tratamento visual da tabela (Ocultando o número 0 na tela do Streamlit)
             df_display = df_forn[colunas_exibicao].copy()
             df_display["Código"] = df_display["Código"].astype(str)
             
@@ -257,12 +287,10 @@ def iniciar_tela():
                     key=f"f_{forn}"
                 )
 
-        # ─── GERAÇÃO DO FICHEIRO EXCEL CONSOLIDADO ───
         buffer = io.BytesIO()
         if df_excel_list:
             df_final_excel = pd.concat(df_excel_list, ignore_index=True)
             
-            # Limpeza dos ZEROS do Excel (substitui 0 ou NaN por vazio para não sujar o Excel)
             for col in LOJAS + ["TOTAL"]:
                 df_final_excel[col] = df_final_excel[col].apply(lambda x: None if pd.isna(x) or x == 0 else x)
 
@@ -270,18 +298,11 @@ def iniciar_tela():
                 df_final_excel.to_excel(writer, index=False, sheet_name="Resumo_Pedidos")
                 worksheet = writer.sheets["Resumo_Pedidos"]
                 
-                # Ajuste automático das larguras das colunas no Excel (Corrigido e Seguro)
                 for idx, col_name in enumerate(df_final_excel.columns):
-                    # Método seguro à prova de PyArrow para calcular o tamanho do conteúdo
                     max_content_len = df_final_excel[col_name].fillna("").astype(str).str.len().max()
-                    
-                    # Prevenção extra caso a coluna esteja totalmente vazia
                     if pd.isna(max_content_len):
                         max_content_len = 0
-                        
                     max_len = max(max_content_len, len(str(col_name))) + 2
-                    
-                    # Converte o índice numérico (0, 1, 2...) para a letra da coluna correspondente (A, B, C...)
                     col_letter = chr(65 + idx)
                     worksheet.column_dimensions[col_letter].width = max_len
 
@@ -289,10 +310,8 @@ def iniciar_tela():
         else:
             excel_data = None
 
-        # ─── BARRA DE BOTÕES INTERNA (POSICIONADA ABAIXO) ───
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Centralizando o botão de exportação
         c1, c2, c3 = st.columns([3, 4, 3])
         with c2:
             if excel_data:
