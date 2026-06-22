@@ -205,15 +205,14 @@ def iniciar_tela():
         df_all = carregar_pedidos()
         df_cat = carregar_catalogo_folhagem()
         
-        # AJUSTE VISUAL: Criação de um dicionário de configuração de colunas
-        # A "Descrição" ganha width="large" para absorver o espaço e não deixar os números esticarem.
+        # AJUSTE VISUAL: O st.column_config agora vai segurar firme as larguras.
         col_cfg_resumo = {
-            "Código": st.column_config.NumberColumn("Código", width="small", disabled=True),
-            "Descrição": st.column_config.TextColumn("Descrição", width="large", disabled=True),
-            "TOTAL": st.column_config.NumberColumn("TOTAL", width="small", disabled=True)
+            "Código": st.column_config.NumberColumn("Código", width="small"),
+            "Descrição": st.column_config.TextColumn("Descrição", width="large"),
+            "TOTAL": st.column_config.NumberColumn("TOTAL", width="small")
         }
         for l in LOJAS:
-            col_cfg_resumo[l] = st.column_config.NumberColumn(l, width="small", disabled=True)
+            col_cfg_resumo[l] = st.column_config.NumberColumn(l, width="small")
 
         for forn in df_cat["Fornecedor"].dropna().unique():
             df_forn = df_all[df_all["Fornecedor"] == forn].copy()
@@ -231,11 +230,11 @@ def iniciar_tela():
                 st.markdown(f"##### Fornecedor: {forn}")
                 colunas_exibicao = ["Código", "Descrição"] + lojas_ativas + ["TOTAL"]
                 
-                # st.data_editor agora usa o column_config criado acima
-                st.data_editor(
+                # Mudamos para st.dataframe (apenas leitura) e desativamos o use_container_width
+                st.dataframe(
                     df_forn[colunas_exibicao], 
                     hide_index=True, 
-                    use_container_width=True, 
+                    use_container_width=False, 
                     column_config=col_cfg_resumo,
                     key=f"f_{forn}"
                 )
