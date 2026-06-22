@@ -219,6 +219,13 @@ if st.session_state['usuario_logado'] is None:
                     <p style='color:#7d8590;font-size:14px;'>Acesso Unificado — Molicenter</p>
                 </div>
             """, unsafe_allow_html=True)
+    
+    with logo_col:
+                # Opcional: Adicionar um pequeno espaço para alinhar verticalmente com o texto
+                st.write("") 
+                try:
+                    st.image("passaro_logo.png", width=60)
+            
             st.divider()
             
             LOJAS_LOGIN = ["Loja 01", "Loja 02", "Loja 03", "Loja 04", "Loja 05", "Loja 06", "Loja 07", "Loja 08"]
