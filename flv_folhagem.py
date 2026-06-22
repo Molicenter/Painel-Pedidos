@@ -268,17 +268,33 @@ def iniciar_tela():
 
             with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
                 df_final_excel.to_excel(writer, index=False, sheet_name="Resumo_Pedidos")
+                worksheet = writer.sheets["Resumo_Pedidos"]
+                
+                # Ajuste automático das larguras das colunas no Excel
+                for idx, col_name in enumerate(df_final_excel.columns):
+                    # Calcula o tamanho máximo do conteúdo da coluna (incluindo o título)
+                    max_len = max(
+                        df_final_excel[col_name].astype(str).map(len).max(),
+                        len(str(col_name))
+                    ) + 2  # +2 de margem extra
+                    
+                    # Converte o índice numérico (0, 1, 2...) para a letra da coluna correspondente (A, B, C...)
+                    col_letter = chr(65 + idx)
+                    worksheet.column_dimensions[col_letter].width = max_len
+
             excel_data = buffer.getvalue()
         else:
             excel_data = None
 
-        # ─── BARRA DE BOTÕES INTERNA (POSICIONADA ABAIXO SEM O BOTÃO IMPRIMIR) ───
+        # ─── BARRA DE BOTÕES INTERNA (POSICIONADA ABAIXO) ───
         st.markdown("<br>", unsafe_allow_html=True)
-        c1, _ = st.columns([3, 7])
-        with c1:
+        
+        # Centralizando o botão de exportação
+        c1, c2, c3 = st.columns([3, 4, 3])
+        with c2:
             if excel_data:
                 st.download_button(
-                    label="📊 Exportar Excel",
+                    label="📊 Baixar Excel Consolidado",
                     data=excel_data,
                     file_name="resumo_pedidos_folhagem.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -286,7 +302,7 @@ def iniciar_tela():
                     key="btn_excel_forn"
                 )
             else:
-                st.button("📊 Exportar Excel", disabled=True, use_container_width=True)
+                st.button("📊 Baixar Excel Consolidado", disabled=True, use_container_width=True)
 
     # ─────────────────────────────────────────────
     # ROTA 4 — CATÁLOGO DE PRODUTOS
