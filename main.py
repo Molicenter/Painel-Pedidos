@@ -58,7 +58,7 @@ if 'modulo_ativo' not in st.session_state:
     st.session_state['modulo_ativo'] = 'Home'
 
 # ─────────────────────────────────────────────────────────────────────────────
-# 5. CSS AVANÇADO (VISUAL EXATO DA FOTO 1)
+# 5. CSS AVANÇADO (VISUAL EXATO + FORÇAR MENU ESQUERDO)
 # ─────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -75,10 +75,21 @@ st.markdown("""
     zoom: 0.90 !important; /* Ajuste fino: compacto para os cards, mas legível no login */
 }
 
-/* Ocultar Menu e Rodapé, MAS DEIXAR O CABEÇALHO TRANSPARENTE PARA NÃO SUMIR O BOTÃO DA SIDEBAR */
+/* Ocultar Menu e Rodapé, MAS DEIXAR O CABEÇALHO TRANSPARENTE */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
-header {background-color: transparent !important;} /* <- A MÁGICA ESTÁ AQUI */
+header {background-color: transparent !important;} 
+
+/* ── MÁGICA: FORÇAR O MENU ESQUERDO A APARECER PARA AS LOJAS ── */
+/* Isso anula as travas escondidas dentro dos outros 9 arquivos dos setores */
+html body [data-testid="collapsedControl"] {
+    display: flex !important;
+    visibility: visible !important;
+    z-index: 99999 !important;
+}
+html body section[data-testid="stSidebar"] {
+    display: block !important;
+}
 
 /* ── Banner Superior Azul Escuro ── */
 .banner-container {
@@ -141,7 +152,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover .card-img-container img {
 }
 
 /* ── Botões Brancos de Título (FORÇANDO BRANCO E PRETO) ── */
-/* Usamos :not([kind="primary"]) para não estragar o botão azul do Login */
 div[data-testid="stVerticalBlockBorderWrapper"] button:not([kind="primary"]) {
     background-color: #ffffff !important;
     background: #ffffff !important;
@@ -197,20 +207,29 @@ div[data-testid="stVerticalBlockBorderWrapper"] button:not([kind="primary"]):hov
 if st.session_state['usuario_logado'] is None:
     st.write("<br><br><br>", unsafe_allow_html=True)
     
-    # Aumentando a largura da coluna central para 1.8 (deixa a caixa mais imponente)
     _, col2, _ = st.columns([1, 1, 1])
     
     with col2:
         with st.container(border=True):
-            # Espaço extra interno para deixar "quadrado"
             st.write("<br>", unsafe_allow_html=True)
             
-            st.markdown("""
-                <div style='text-align:center;'>
-                    <h2 style='margin-bottom:0; color:white;'>Portal de Pedidos</h2>
-                    <p style='color:#7d8590;font-size:14px;'>Acesso Unificado — Molicenter</p>
-                </div>
-            """, unsafe_allow_html=True)
+            _, title_col, logo_col = st.columns([1, 4, 1])
+            
+            with title_col:
+                st.markdown("""
+                    <div style='text-align:center;'>
+                        <h2 style='margin-bottom:0; color:white;'>Portal de Pedidos</h2>
+                        <p style='color:#7d8590;font-size:14px;'>Acesso Unificado — Molicenter</p>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+            with logo_col:
+                st.write("") 
+                try:
+                    st.image("passaro_logo.png", width=60)
+                except Exception:
+                    st.markdown("<div style='text-align:center; font-size:30px;'>🥬</div>", unsafe_allow_html=True)
+        
             st.divider()
             
             LOJAS_LOGIN = ["Loja 01", "Loja 02", "Loja 03", "Loja 04", "Loja 05", "Loja 06", "Loja 07", "Loja 08"]
@@ -221,12 +240,20 @@ if st.session_state['usuario_logado'] is None:
             st.write("<br>", unsafe_allow_html=True)
 
             if st.button("Entrar no Sistema", type="primary", use_container_width=True):
+                # Buscando senhas seguras dos secrets do Streamlit
+                try:
+                    senha_admin_correta = st.secrets["SENHA_ADMIN"]
+                    senha_lojas_correta = st.secrets["SENHA_LOJAS"]
+                except KeyError:
+                    st.error("⚠️ Configuração de senhas ausente. Verifique os secrets do Streamlit.")
+                    st.stop()
+
                 if usuario_selecionado == "Selecione...":
                     st.error("⚠️ Por favor, selecione um usuário.")
-                elif usuario_selecionado == "Administrador" and senha_digitada == "moli0000":
+                elif usuario_selecionado == "Administrador" and senha_digitada == senha_admin_correta:
                     st.session_state['usuario_logado'] = usuario_selecionado
                     st.rerun()
-                elif usuario_selecionado in LOJAS_LOGIN and senha_digitada == "moli1234":
+                elif usuario_selecionado in LOJAS_LOGIN and senha_digitada == senha_lojas_correta:
                     st.session_state['usuario_logado'] = usuario_selecionado
                     st.rerun()
                 elif senha_digitada:
@@ -255,7 +282,6 @@ def criar_card(titulo, subtitulo, caminho_imagem, emoji_fallback, chave_modulo):
             </div>
             """, unsafe_allow_html=True)
         
-        # Botão branco com texto preto
         if st.button(titulo, key=f"btn_{chave_modulo}", use_container_width=True):
             st.session_state['modulo_ativo'] = chave_modulo
             st.rerun()
@@ -266,10 +292,15 @@ def renderizar_dashboard():
     logo_src = imagem_para_b64("passaro_logo.png")
     img_tag = f'<img src="{logo_src}" class="banner-logo" alt="Logo">' if logo_src else '<span style="font-size:28px">🛒</span>'
     
+    loja_logada = st.session_state.get('usuario_logado', '')
+    
     st.markdown(f"""
     <div class="banner-container">
         {img_tag}
-        <div class="banner-title">Gestão Pedidos - Molicenter</div>
+        <div class="banner-title">
+            Gestão Pedidos - Molicenter 
+            <span style="font-size: 18px; font-weight: 500; color: #a5d8ff;">&nbsp; ---> Visão: {loja_logada}</span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -286,7 +317,7 @@ def renderizar_dashboard():
     c1, c2, c3, _ = st.columns(4, gap="medium")
     with c1: criar_card("Pioneiro + BF + Paraná", "Seg a Sex até 11:00hrs", "Pioneiros.jpg", "🍗", "acougue_especiais")
     with c2: criar_card("Açougue Adriano", "Quartas-feira até 15:00hrs<br>Sábado até 15:00hrs", IMG_ACOUGUE, "🔪", "acougue_total")
-    with c3: criar_card("Peças Açougue - Manoel", "Seg/Qua/Sex - Arap. 15:00h<br>Ter/Qui/Sáb - Maringá 15:00h", "img_manoel.jpg", "🥩", "acougue_pecas")
+    with c3: criar_card("Peças Açougue - Manoel", "Seg/Qua/Sex - Arap. 15:00h<br>Ter/Qui/Sáb - Maringá 15:00h", IMG_ACOUGUE, "🥩", "acougue_pecas")
 
     # --- LINHA 3 ---
     st.markdown('<div class="linha-titulo-sec">📦 Outros Setores e Logística</div>', unsafe_allow_html=True)
@@ -311,7 +342,6 @@ def renderizar_dashboard():
 if st.session_state['modulo_ativo'] == 'Home':
     renderizar_dashboard()
 else:
-    # Barra lateral padrão para navegação de retorno
     with st.sidebar:
         st.write(f"👤 Utilizador: **{st.session_state['usuario_logado']}**")
         st.divider()
@@ -324,32 +354,13 @@ else:
             st.rerun()
 
     # Execução do módulo selecionado
-    if st.session_state['modulo_ativo'] == 'flv_folhagem':
-        flv_folhagem.iniciar_tela()
-        
-    elif st.session_state['modulo_ativo'] == 'flv_normal':
-        flv_normal.iniciar_tela()
-
-    elif st.session_state['modulo_ativo'] == 'flv_ofertas':
-        flv_ofertas.iniciar_tela()
-
-    elif st.session_state['modulo_ativo'] == 'flv_oriental':
-        flv_oriental.iniciar_tela()
-
-    elif st.session_state['modulo_ativo'] == 'embalagem':
-        embalagem.iniciar_tela()
-
-    elif st.session_state['modulo_ativo'] == 'padaria_confeitaria':
-        padaria_confeitaria.iniciar_tela()
-
-    elif st.session_state['modulo_ativo'] == 'materia_prima':
-        materia_prima.iniciar_tela()
-    
-    elif st.session_state['modulo_ativo'] == 'acougue_especiais':
-        acougue_especiais.iniciar_tela()
-
-    elif st.session_state['modulo_ativo'] == 'acougue_total':
-        acougue_total.iniciar_tela()
-
-    elif st.session_state['modulo_ativo'] == 'acougue_pecas':
-        acougue_pecas.iniciar_tela()
+    if st.session_state['modulo_ativo'] == 'flv_folhagem': flv_folhagem.iniciar_tela()
+    elif st.session_state['modulo_ativo'] == 'flv_normal': flv_normal.iniciar_tela()
+    elif st.session_state['modulo_ativo'] == 'flv_ofertas': flv_ofertas.iniciar_tela()
+    elif st.session_state['modulo_ativo'] == 'flv_oriental': flv_oriental.iniciar_tela()
+    elif st.session_state['modulo_ativo'] == 'embalagem': embalagem.iniciar_tela()
+    elif st.session_state['modulo_ativo'] == 'padaria_confeitaria': padaria_confeitaria.iniciar_tela()
+    elif st.session_state['modulo_ativo'] == 'materia_prima': materia_prima.iniciar_tela()
+    elif st.session_state['modulo_ativo'] == 'acougue_especiais': acougue_especiais.iniciar_tela()
+    elif st.session_state['modulo_ativo'] == 'acougue_total': acougue_total.iniciar_tela()
+    elif st.session_state['modulo_ativo'] == 'acougue_pecas': acougue_pecas.iniciar_tela()
