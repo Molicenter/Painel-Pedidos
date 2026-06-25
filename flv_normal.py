@@ -456,9 +456,10 @@ def _gerar_excel_formatado(df_editado_admin, filtro_setor):
 
     # Ajuste impressão
     ws.sheet_properties.pageSetUpPr.fitToPage = True
-    ws.page_setup.fitToWidth = 1
-    ws.page_setup.fitToHeight = False
-    ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
+    ws.page_setup.fitToWidth = 1       # Força a caber todas as colunas em 1 página de largura
+    ws.page_setup.fitToHeight = False  # Deixa as linhas fluírem para quantas páginas forem necessárias
+    ws.page_setup.orientation = ws.ORIENTATION_PORTRAIT # Define para o Modo Retrato
+    ws.page_setup.paperSize = 9        # O código 9 na biblioteca openpyxl representa o Papel A4
 
     buf = io.BytesIO()
     wb.save(buf)
